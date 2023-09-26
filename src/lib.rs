@@ -24,10 +24,14 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
     ) {
         self.amp_factor().set_if_empty(amp_factor);
 
-        if self.tokens().is_empty() {
+        if self.nb_tokens().is_empty() {
+            self.nb_tokens().set(tokens_and_multipliers.len());
+
+            let mut i = 0usize;
             for (token, multiplier) in tokens_and_multipliers {
-                self.tokens().push(&token);
-                self.multipliers().push(&multiplier);
+                self.tokens(i).set(&token);
+                self.multipliers(i).set(&multiplier);
+                i += 1;
             }
         }
     }
@@ -100,8 +104,8 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
     fn get_xp(&self) -> ManagedVec<Self::Api, BigUint> {
         let mut xp = ManagedVec::<Self::Api, BigUint>::new();
 
-        for i in 0..self.balances().len() {
-            xp.push(self.balances().get(i) * self.multipliers().get(i));
+        for i in 0..self.nb_tokens().get() {
+            xp.push(self.balances(i).get() * self.multipliers(i).get());
         }
 
         xp
@@ -256,21 +260,21 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
 
         // Calculate dy
         let xp = self.get_xp();
-        let x = xp.get(i).clone_value() + &dx * &self.multipliers().get(i);
+        let x = xp.get(i).clone_value() + &dx * &self.multipliers(i).get();
 
         let y0 = xp.get(j).clone_value();
         let y1 = self.get_y(i, j, x, xp);
 
         // y0 must be >= y1, since x has increased
         // -1 to round down
-        let mut dy = (&y0 - &y1 - 1u32) / self.multipliers().get(j);
+        let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
 
         // Subtract fee from dy
         let fee = (&dy * SWAP_FEE) / FEE_DENOMINATOR;
         dy -= fee;
 
-        self.balances().set(i, &(self.balances().get(i) + &dx));
-        self.balances().set(j, &(self.balances().get(j) - &dy));
+        self.balances(i).update(|x| *x += &dx);
+        self.balances(j).update(|x| *x -= &dy);
 
         dy
     }
@@ -291,7 +295,7 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
         for i in 0..n {
             let amount = amounts.get(i).clone_value();
             if &amount > &0 {
-                new_xs.push(old_xs.get(i).clone_value() + amount * self.multipliers().get(i));
+                new_xs.push(old_xs.get(i).clone_value() + amount * self.multipliers(i).get());
             } else {
                 new_xs.push(old_xs.get(i).clone_value());
             }
@@ -322,8 +326,8 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
 
         // Update balances
         for i in 0..n {
-            let new_balance = self.balances().get(i) + amounts.get(i).clone_value();
-            self.balances().set(i, &new_balance);
+            let new_balance = self.balances(i).get() + amounts.get(i).clone_value();
+            self.balances(i).set(&new_balance);
         }
 
         // Shares to mint = (d2 - d0) / d0 * total supply
@@ -341,14 +345,14 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
 
     fn do_remove_liquidity(&self, shares: BigUint) -> ManagedVec<Self::Api, BigUint> {
         let total_supply = self.lp_token_supply().get();
-        let n = self.tokens().len();
+        let n = self.nb_tokens().get();
         let mut amounts_out = ManagedVec::<Self::Api, BigUint>::new();
 
         for i in 0..n {
-            let balance = self.balances().get(i);
+            let balance = self.balances(i).get();
             let amount_out = (&balance * &shares) / &total_supply;
 
-            self.balances().set(i, &(&balance - &amount_out));
+            self.balances(i).set(&(&balance - &amount_out));
             amounts_out.push(amount_out);
         }
 
@@ -367,7 +371,7 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
     /// fee: Fee for withdraw. Fee already included in dy
     fn calculate_withdraw_one_token(&self, shares: &BigUint, i: usize) -> (BigUint, BigUint) {
         let total_supply = self.lp_token_supply().get();
-        let n = self.tokens().len();
+        let n = self.nb_tokens().get();
         let liquidity_fee = self.liquidity_fee().get();
 
         let xp = self.get_xp();
@@ -379,7 +383,7 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
         // Calculate reduction in y if D = d1
         let y0 = self.get_yd(i, &xp, &d1);
         // d1 <= d0 so y must be <= xp[i]
-        let dy0 = (xp.get(i).clone_value() - &y0) / self.multipliers().get(i);
+        let dy0 = (xp.get(i).clone_value() - &y0) / self.multipliers(i).get();
 
         // Calculate imbalance fee, update xp with fees
         let mut new_xs = ManagedVec::<Self::Api, BigUint>::new();
@@ -398,7 +402,7 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
         // Recalculate y with xp including imbalance fees
         let y1 = self.get_yd(i, &new_xs, &d1);
         // - 1 to round down
-        let dy = (new_xs.get(i).clone_value() - y1 - 1u32) / self.multipliers().get(i);
+        let dy = (new_xs.get(i).clone_value() - y1 - 1u32) / self.multipliers(i).get();
         let fee = dy0 - &dy;
 
         (dy, fee)
@@ -411,8 +415,7 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
     fn remove_liquidity_one_token(&self, shares: BigUint, i: usize) -> BigUint {
         let (amount_out, _) = self.calculate_withdraw_one_token(&shares, i);
 
-        let new_balance = &self.balances().get(i) - &amount_out;
-        self.balances().set(i, &new_balance);
+        self.balances(i).update(|x| *x -= &amount_out);
         self.lp_burn(&shares);
 
         amount_out
@@ -426,7 +429,7 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
     fn amp_factor(&self) -> SingleValueMapper<u32>;
 
     #[storage_mapper("balances")]
-    fn balances(&self) -> VecMapper<BigUint>;
+    fn balances(&self, i: usize) -> SingleValueMapper<BigUint>;
 
     #[storage_mapper("liquidity_fee")]
     fn liquidity_fee(&self) -> SingleValueMapper<u32>;
@@ -438,11 +441,14 @@ pub trait JexScStablepoolContract: pausable::PausableModule {
     fn lp_token(&self) -> SingleValueMapper<TokenIdentifier>;
 
     #[storage_mapper("multipliers")]
-    fn multipliers(&self) -> VecMapper<BigUint>;
+    fn multipliers(&self, i: usize) -> SingleValueMapper<BigUint>;
+
+    #[storage_mapper("nb_tokens")]
+    fn nb_tokens(&self) -> SingleValueMapper<usize>;
 
     #[storage_mapper("swap_fee")]
     fn swap_fee(&self) -> SingleValueMapper<u32>;
 
     #[storage_mapper("tokens")]
-    fn tokens(&self) -> VecMapper<TokenIdentifier>;
+    fn tokens(&self, i: usize) -> SingleValueMapper<TokenIdentifier>;
 }

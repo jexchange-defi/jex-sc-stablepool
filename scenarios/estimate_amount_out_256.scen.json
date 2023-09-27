@@ -19,9 +19,9 @@
           "owner": "address:owner",
           "storage": {
             "str:amp_factor": "256",
-            "str:balances|u32:0": "514670,000000000000000000",
-            "str:balances|u32:1": "392640,000000",
-            "str:balances|u32:2": "495630,000000",
+            "str:reserves|u32:0": "514670,000000000000000000",
+            "str:reserves|u32:1": "392640,000000",
+            "str:reserves|u32:2": "495630,000000",
             "str:liquidity_fee": "0",
             "str:lp_token": "str:LPJ3USD-000000",
             "str:multipliers|u32:0": "1",

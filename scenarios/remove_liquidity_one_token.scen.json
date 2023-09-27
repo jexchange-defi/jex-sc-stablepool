@@ -29,9 +29,9 @@
           "owner": "address:owner",
           "storage": {
             "str:amp_factor": "256",
-            "str:balances|u32:0": "514250,000000000000000000",
-            "str:balances|u32:1": "393630,000000",
-            "str:balances|u32:2": "495010,000000",
+            "str:reserves|u32:0": "514250,000000000000000000",
+            "str:reserves|u32:1": "393630,000000",
+            "str:reserves|u32:2": "495010,000000",
             "str:liquidity_fee": "187",
             "str:lp_token": "str:LPJ3USD-000000",
             "str:lp_token_supply": "1398745,201053361014295467",
@@ -95,9 +95,9 @@
             }
           },
           "storage": {
-            "str:balances|u32:0": "514248,996913393955483222",
-            "str:balances|u32:1": "393630,000000",
-            "str:balances|u32:2": "495010,000000",
+            "str:reserves|u32:0": "514248,996913393955483222",
+            "str:reserves|u32:1": "393630,000000",
+            "str:reserves|u32:2": "495010,000000",
             "str:lp_token_supply": "1398744,201053361014295467",
             "+": "*"
           }

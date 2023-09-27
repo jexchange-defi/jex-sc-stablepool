@@ -123,10 +123,10 @@ pub trait LiquidityModule:
         if !readonly {
             self.lp_mint(&shares);
 
-            // Update balances
+            // Update reserves
             for i in 0..n {
-                let new_balance = self.balances(i).get() + amounts.get(i).clone_value();
-                self.balances(i).set(&new_balance);
+                let new_balance = self.reserves(i).get() + amounts.get(i).clone_value();
+                self.reserves(i).set(&new_balance);
             }
         }
 
@@ -143,11 +143,11 @@ pub trait LiquidityModule:
         let mut amounts_out = ManagedVec::<Self::Api, BigUint>::new();
 
         for i in 0..n {
-            let balance = self.balances(i).get();
+            let balance = self.reserves(i).get();
             let amount_out = (&balance * shares) / &total_supply;
 
             if !readonly {
-                self.balances(i).set(&(&balance - &amount_out));
+                self.reserves(i).set(&(&balance - &amount_out));
             }
             amounts_out.push(amount_out);
         }
@@ -184,8 +184,8 @@ pub trait LiquidityModule:
         dy -= fee;
 
         if !readonly {
-            self.balances(i).update(|x| *x += &dx);
-            self.balances(j).update(|x| *x -= &dy);
+            self.reserves(i).update(|x| *x += &dx);
+            self.reserves(j).update(|x| *x -= &dy);
         }
 
         dy
@@ -199,19 +199,19 @@ pub trait LiquidityModule:
         let (amount_out, _) = self.calculate_withdraw_one_token(&shares, i);
 
         if !readonly {
-            self.balances(i).update(|x| *x -= &amount_out);
+            self.reserves(i).update(|x| *x -= &amount_out);
             self.lp_burn(&shares);
         }
 
         amount_out
     }
 
-    // Return precision-adjusted balances, adjusted to 18 decimals
+    // Return precision-adjusted reserves, adjusted to 18 decimals
     fn get_xp(&self) -> ManagedVec<Self::Api, BigUint> {
         let mut xp = ManagedVec::<Self::Api, BigUint>::new();
 
         for i in 0..self.nb_tokens().get() {
-            xp.push(self.balances(i).get() * self.multipliers(i).get());
+            xp.push(self.reserves(i).get() * self.multipliers(i).get());
         }
 
         xp
@@ -231,8 +231,8 @@ pub trait LiquidityModule:
         self.send().esdt_local_mint(&lp_token, 0, amount);
     }
 
-    #[storage_mapper("balances")]
-    fn balances(&self, i: usize) -> SingleValueMapper<BigUint>;
+    #[storage_mapper("reserves")]
+    fn reserves(&self, i: usize) -> SingleValueMapper<BigUint>;
 
     #[storage_mapper("lp_token_supply")]
     fn lp_token_supply(&self) -> SingleValueMapper<BigUint>;

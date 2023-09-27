@@ -2,10 +2,10 @@ multiversx_sc::imports!();
 
 #[multiversx_sc::module]
 pub trait AmmModule: super::maths::MathsModule {
-    /// Calculate D, sum of balances in a perfectly balanced pool
-    /// If balances of x_0, x_1, ... x_(n-1) then sum(x_i) = D
+    /// Calculate D, sum of reserves in a perfectly balanced pool
+    /// If reserves of x_0, x_1, ... x_(n-1) then sum(x_i) = D
     ///
-    /// xp: precision-adjusted balances
+    /// xp: precision-adjusted reserves
     ///
     /// return D
     fn amm_get_d(&self, xp: &ManagedVec<Self::Api, BigUint>) -> BigUint {
@@ -60,7 +60,7 @@ pub trait AmmModule: super::maths::MathsModule {
     /// j: Index of token out
     /// x: New balance of token i
     /// amp_factor: A
-    /// xp Current precision-adjusted balances
+    /// xp Current precision-adjusted reserves
     fn amm_get_y(
         &self,
         i: usize,
@@ -127,10 +127,10 @@ pub trait AmmModule: super::maths::MathsModule {
     }
 
     /// Calculate the new balance of token i given precision-adjusted
-    /// balances xp and liquidity d
+    /// reserves xp and liquidity d
     ///
     /// i: Index of token to calculate the new balance
-    /// xp: Precision-adjusted balances
+    /// xp: Precision-adjusted reserves
     /// d: Liquidity d
     ///
     /// return New balance of token i

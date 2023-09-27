@@ -242,6 +242,15 @@ pub trait JexScStablepoolContract:
         amounts_out.into()
     }
 
+    #[view(estimateRemoveLiquidityOneToken)]
+    fn remove_liquidity_one_token(&self, shares: BigUint, token_out: TokenIdentifier) -> BigUint {
+        let index_token_out = self.get_token_index(&token_out);
+
+        let (amount_out, _) = self.calculate_withdraw_one_token(&shares, index_token_out);
+
+        amount_out
+    }
+
     //
     // Callbacks
     //

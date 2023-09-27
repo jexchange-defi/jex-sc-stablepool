@@ -12,19 +12,19 @@
           "balance": "0",
           "code": "file:../output/jex-sc-stablepool.wasm",
           "esdt": {
-            "str:BUSD-000000": "514260,000000000000000000",
-            "str:USDC-000000": "393650,000000",
-            "str:USDT-000000": "495030,000000"
+            "str:BUSD-000000": "514250,000000000000000000",
+            "str:USDC-000000": "393630,000000",
+            "str:USDT-000000": "495010,000000"
           },
           "owner": "address:owner",
           "storage": {
             "str:amp_factor": "256",
-            "str:balances|u32:0": "514260,000000000000000000",
-            "str:balances|u32:1": "393650,000000",
-            "str:balances|u32:2": "495030,000000",
+            "str:balances|u32:0": "514250,000000000000000000",
+            "str:balances|u32:1": "393630,000000",
+            "str:balances|u32:2": "495010,000000",
             "str:liquidity_fee": "187",
             "str:lp_token": "str:LPJ3USD-000000",
-            "str:lp_token_supply": "1398807,409144931712387963",
+            "str:lp_token_supply": "1398745,201053361014295467",
             "str:multipliers|u32:0": "1",
             "str:multipliers|u32:1": "1,000000000000",
             "str:multipliers|u32:2": "1,000000000000",
@@ -41,33 +41,22 @@
       "step": "scQuery",
       "tx": {
         "to": "sc:pool",
-        "function": "estimateRemoveLiquidity",
-        "arguments": ["1000,000000000000000000"]
+        "function": "estimateRemoveLiquidityOneToken",
+        "arguments": ["1,000000000000000000", "str:BUSD-000000"]
       },
       "expect": {
-        "out": ["367,641747275530088375", "281,418297", "353,894322"]
+        "out": ["1,003086606044516778"]
       }
     },
     {
       "step": "scQuery",
       "tx": {
         "to": "sc:pool",
-        "function": "estimateRemoveLiquidity",
-        "arguments": ["100,000000000000000000"]
+        "function": "estimateRemoveLiquidityOneToken",
+        "arguments": ["1,000000000000000000", "str:USDT-000000"]
       },
       "expect": {
-        "out": ["36,764174727553008837", "28,141829", "35,389432"]
-      }
-    },
-    {
-      "step": "scQuery",
-      "tx": {
-        "to": "sc:pool",
-        "function": "estimateRemoveLiquidity",
-        "arguments": ["0"]
-      },
-      "expect": {
-        "out": ["0", "0", "0"]
+        "out": ["1,002940"]
       }
     }
   ]

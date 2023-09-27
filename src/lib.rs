@@ -177,17 +177,43 @@ pub trait JexScStablepoolContract:
         payments_out.into()
     }
 
+    #[endpoint(removeLiquidityOneToken)]
+    #[payable("*")]
+    fn remove_liquidity_one_token(
+        &self,
+        token_out: TokenIdentifier,
+        min_amount_out: BigUint,
+    ) -> EsdtTokenPayment {
+        let (token_in, amount_in) = self.call_value().single_fungible_esdt();
+
+        require!(token_in == self.lp_token().get(), "Invalid payment token");
+
+        let index_token_out = self.get_token_index(&token_out);
+
+        let amount_out = self.do_remove_liquidity_one_token(amount_in, index_token_out, false);
+
+        require!(amount_out >= min_amount_out, "Max slippage exceeded");
+
+        let payment_out = EsdtTokenPayment::new(token_out, 0u64, amount_out);
+
+        self.send().direct_esdt(
+            &self.blockchain().get_caller(),
+            &payment_out.token_identifier,
+            payment_out.token_nonce,
+            &payment_out.amount,
+        );
+        payment_out
+    }
+
     #[endpoint(swap)]
     #[payable("*")]
     fn swap(&self, token_out: TokenIdentifier, min_amount_out: BigUint) -> EsdtTokenPayment {
         let (token_in, amount_in) = self.call_value().single_fungible_esdt();
 
-        let amount_out = self.estimate_amount_out(
-            token_in,
-            amount_in,
-            token_out.clone(),
-            OptionalValue::Some(false),
-        );
+        let index_token_in = self.get_token_index(&token_in);
+        let index_token_out = self.get_token_index(&token_out);
+
+        let amount_out = self.do_swap(index_token_in, index_token_out, amount_in, false);
 
         require!(amount_out >= min_amount_out, "Max slippage exceeded");
 
@@ -213,17 +239,11 @@ pub trait JexScStablepoolContract:
         token_in: TokenIdentifier,
         amount_in: BigUint,
         token_out: TokenIdentifier,
-        readonly: OptionalValue<bool>,
     ) -> BigUint {
         let index_token_in = self.get_token_index(&token_in);
         let index_token_out = self.get_token_index(&token_out);
 
-        let amount_out = self.do_swap(
-            index_token_in,
-            index_token_out,
-            amount_in,
-            readonly.into_option().unwrap_or(true),
-        );
+        let amount_out = self.do_swap(index_token_in, index_token_out, amount_in, true);
 
         amount_out
     }
@@ -243,10 +263,14 @@ pub trait JexScStablepoolContract:
     }
 
     #[view(estimateRemoveLiquidityOneToken)]
-    fn remove_liquidity_one_token(&self, shares: BigUint, token_out: TokenIdentifier) -> BigUint {
+    fn estimate_remove_liquidity_one_token(
+        &self,
+        shares: BigUint,
+        token_out: TokenIdentifier,
+    ) -> BigUint {
         let index_token_out = self.get_token_index(&token_out);
 
-        let (amount_out, _) = self.calculate_withdraw_one_token(&shares, index_token_out);
+        let amount_out = self.do_remove_liquidity_one_token(shares, index_token_out, true);
 
         amount_out
     }

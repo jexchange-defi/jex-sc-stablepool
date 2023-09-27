@@ -195,11 +195,13 @@ pub trait LiquidityModule:
     ///
     /// shares: Shares to burn
     /// i: Token to withdraw
-    fn do_remove_liquidity_one_token(&self, shares: BigUint, i: usize) -> BigUint {
+    fn do_remove_liquidity_one_token(&self, shares: BigUint, i: usize, readonly: bool) -> BigUint {
         let (amount_out, _) = self.calculate_withdraw_one_token(&shares, i);
 
-        self.balances(i).update(|x| *x -= &amount_out);
-        self.lp_burn(&shares);
+        if !readonly {
+            self.balances(i).update(|x| *x -= &amount_out);
+            self.lp_burn(&shares);
+        }
 
         amount_out
     }

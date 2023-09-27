@@ -133,7 +133,11 @@ pub trait LiquidityModule:
         shares
     }
 
-    fn do_remove_liquidity(&self, shares: &BigUint) -> ManagedVec<Self::Api, BigUint> {
+    fn do_remove_liquidity(
+        &self,
+        shares: &BigUint,
+        readonly: bool,
+    ) -> ManagedVec<Self::Api, BigUint> {
         let total_supply = self.lp_token_supply().get();
         let n = self.nb_tokens().get();
         let mut amounts_out = ManagedVec::<Self::Api, BigUint>::new();
@@ -142,11 +146,15 @@ pub trait LiquidityModule:
             let balance = self.balances(i).get();
             let amount_out = (&balance * shares) / &total_supply;
 
-            self.balances(i).set(&(&balance - &amount_out));
+            if !readonly {
+                self.balances(i).set(&(&balance - &amount_out));
+            }
             amounts_out.push(amount_out);
         }
 
-        self.lp_burn(&shares);
+        if !readonly {
+            self.lp_burn(&shares);
+        }
 
         amounts_out
     }

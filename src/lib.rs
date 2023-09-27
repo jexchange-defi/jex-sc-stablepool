@@ -154,7 +154,7 @@ pub trait JexScStablepoolContract:
         require!(token_in == self.lp_token().get(), "Invalid payment token");
 
         let min_amounts_vec = min_amounts.to_vec();
-        let amounts_out = self.do_remove_liquidity(&amount_in);
+        let amounts_out = self.do_remove_liquidity(&amount_in, false);
 
         let mut payments_out = ManagedVec::<Self::Api, EsdtTokenPayment>::new();
         let mut i = 0usize;
@@ -233,6 +233,13 @@ pub trait JexScStablepoolContract:
         let shares = self.do_add_liquidity(amounts.to_vec(), true);
 
         shares
+    }
+
+    #[view(estimateRemoveLiquidity)]
+    fn estimate_remove_liquidity(&self, shares: BigUint) -> MultiValueEncoded<BigUint> {
+        let amounts_out = self.do_remove_liquidity(&shares, true);
+
+        amounts_out.into()
     }
 
     //

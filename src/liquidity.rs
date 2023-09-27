@@ -68,7 +68,7 @@ pub trait LiquidityModule:
         (dy, fee)
     }
 
-    fn do_add_liquidity(&self, amounts: ManagedVec<Self::Api, BigUint>) -> BigUint {
+    fn do_add_liquidity(&self, amounts: ManagedVec<Self::Api, BigUint>, readonly: bool) -> BigUint {
         // calculate current liquidity d0
         let total_supply = self.lp_token_supply().get();
         let mut d0 = BigUint::zero();
@@ -112,12 +112,6 @@ pub trait LiquidityModule:
             d2 = d1;
         }
 
-        // Update balances
-        for i in 0..n {
-            let new_balance = self.balances(i).get() + amounts.get(i).clone_value();
-            self.balances(i).set(&new_balance);
-        }
-
         // Shares to mint = (d2 - d0) / d0 * total supply
         // d1 >= d2 >= d0
         let shares = if total_supply > 0 {
@@ -126,7 +120,15 @@ pub trait LiquidityModule:
             d2
         };
 
-        self.lp_mint(&shares);
+        if !readonly {
+            self.lp_mint(&shares);
+
+            // Update balances
+            for i in 0..n {
+                let new_balance = self.balances(i).get() + amounts.get(i).clone_value();
+                self.balances(i).set(&new_balance);
+            }
+        }
 
         shares
     }

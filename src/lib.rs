@@ -129,7 +129,7 @@ pub trait JexScStablepoolContract:
 
         require!(nb_valid_payments == payments.len(), "Invalid payment token");
 
-        let shares = self.do_add_liquidity(amounts);
+        let shares = self.do_add_liquidity(amounts, false);
 
         require!(shares >= min_shares, "Max slippage exceeded");
 
@@ -226,6 +226,13 @@ pub trait JexScStablepoolContract:
         );
 
         amount_out
+    }
+
+    #[view(estimateAddLiquidity)]
+    fn estimate_add_liquidity(&self, amounts: MultiValueEncoded<BigUint>) -> BigUint {
+        let shares = self.do_add_liquidity(amounts.to_vec(), true);
+
+        shares
     }
 
     //

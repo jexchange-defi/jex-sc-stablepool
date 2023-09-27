@@ -1,0 +1,86 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:BUSD-000000": "514710,000000000000000000",
+            "str:USDC-000000": "392730,000000",
+            "str:USDT-000000": "495510,000000"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:balances|u32:0": "514710,000000000000000000",
+            "str:balances|u32:1": "392730,000000",
+            "str:balances|u32:2": "495510,000000",
+            "str:liquidity_fee": "112",
+            "str:lp_token": "str:LPJ3USD-000000",
+            "str:lp_token_supply": "1398807,409144931712387963",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1,000000000000",
+            "str:multipliers|u32:2": "1,000000000000",
+            "str:nb_tokens": "3",
+            "str:swap_fee": "500",
+            "str:tokens|u32:0": "str:BUSD-000000",
+            "str:tokens|u32:1": "str:USDC-000000",
+            "str:tokens|u32:2": "str:USDT-000000"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["0", "100,000000", "50,000000"]
+      },
+      "expect": {
+        "out": ["149,608510556994905844"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["1000,000000000000000000", "0", "0"]
+      },
+      "expect": {
+        "out": ["996,541362311554023730"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["0", "0", "0"]
+      },
+      "expect": {
+        "status": "4",
+        "message": "str:liquidity didn't increase"
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["0", "0", "100000,000000"]
+      },
+      "expect": {
+        "out": ["99644,675056446947553688"]
+      }
+    }
+  ]
+}

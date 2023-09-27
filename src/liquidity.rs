@@ -131,6 +131,69 @@ pub trait LiquidityModule:
         shares
     }
 
+    fn do_remove_liquidity(&self, shares: &BigUint) -> ManagedVec<Self::Api, BigUint> {
+        let total_supply = self.lp_token_supply().get();
+        let n = self.nb_tokens().get();
+        let mut amounts_out = ManagedVec::<Self::Api, BigUint>::new();
+
+        for i in 0..n {
+            let balance = self.balances(i).get();
+            let amount_out = (&balance * shares) / &total_supply;
+
+            self.balances(i).set(&(&balance - &amount_out));
+            amounts_out.push(amount_out);
+        }
+
+        self.lp_burn(&shares);
+
+        amounts_out
+    }
+
+    /// Swap dx amount of token i for token j
+    ///
+    /// i: Index of token in
+    /// j: Index of token out
+    /// dx: Token in amount
+    /// return dy
+    fn do_swap(&self, i: usize, j: usize, dx: BigUint, readonly: bool) -> BigUint {
+        require!(i != j, "i = j");
+
+        // Calculate dy
+        let xp = self.get_xp();
+        let x = xp.get(i).clone_value() + &dx * &self.multipliers(i).get();
+
+        let y0 = xp.get(j).clone_value();
+        let y1 = self.amm_get_y(i, j, x, xp);
+
+        // y0 must be >= y1, since x has increased
+        // -1 to round down
+        let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
+
+        // Subtract fee from dy
+        let fee = self.calculate_swap_fee(&dy);
+        dy -= fee;
+
+        if !readonly {
+            self.balances(i).update(|x| *x += &dx);
+            self.balances(j).update(|x| *x -= &dy);
+        }
+
+        dy
+    }
+
+    /// Withdraw liquidity in token i
+    ///
+    /// shares: Shares to burn
+    /// i: Token to withdraw
+    fn do_remove_liquidity_one_token(&self, shares: BigUint, i: usize) -> BigUint {
+        let (amount_out, _) = self.calculate_withdraw_one_token(&shares, i);
+
+        self.balances(i).update(|x| *x -= &amount_out);
+        self.lp_burn(&shares);
+
+        amount_out
+    }
+
     // Return precision-adjusted balances, adjusted to 18 decimals
     fn get_xp(&self) -> ManagedVec<Self::Api, BigUint> {
         let mut xp = ManagedVec::<Self::Api, BigUint>::new();

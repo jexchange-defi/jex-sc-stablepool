@@ -43,68 +43,233 @@ pub trait JexScStablepoolContract:
     }
 
     //
+    // owner endpoints
+    //
+
+    #[only_owner]
+    #[endpoint(setSwapFee)]
+    fn set_swap_fee(&self, swap_fee: u32) {
+        self.update_swap_fee(self.nb_tokens().get(), swap_fee);
+    }
+
+    #[only_owner]
+    #[payable("EGLD")]
+    #[endpoint(issueLpToken)]
+    fn issue_lp_token(&self, lp_token_display_name: ManagedBuffer, lp_token_ticker: ManagedBuffer) {
+        require!(self.lp_token().is_empty(), "LP token already issued");
+
+        let egld_value = self.call_value().egld_value().clone_value();
+        let caller = self.blockchain().get_caller();
+
+        self.send()
+            .esdt_system_sc_proxy()
+            .issue_fungible(
+                egld_value,
+                &lp_token_display_name,
+                &lp_token_ticker,
+                &BigUint::from(1_000u32),
+                FungibleTokenProperties {
+                    num_decimals: 18,
+                    can_freeze: true,
+                    can_wipe: true,
+                    can_pause: true,
+                    can_mint: true,
+                    can_burn: true,
+                    can_change_owner: true,
+                    can_upgrade: true,
+                    can_add_special_roles: true,
+                },
+            )
+            .async_call()
+            .with_callback(self.callbacks().lp_token_issue_callback(&caller))
+            .call_and_exit();
+    }
+
+    #[only_owner]
+    #[endpoint(enableMintBurn)]
+    fn enable_mint_burn(&self) {
+        let lp_token = self.lp_token().get();
+        require!(lp_token.is_valid_esdt_identifier(), "LP token not issued");
+
+        let roles = [EsdtLocalRole::Mint, EsdtLocalRole::Burn];
+
+        let sc_address = self.blockchain().get_sc_address();
+
+        self.send()
+            .esdt_system_sc_proxy()
+            .set_special_roles(&sc_address, &lp_token, roles.iter().cloned())
+            .async_call()
+            .call_and_exit();
+    }
+
+    //
+    // Public endpoints
+    //
+
+    #[endpoint(addLiquidity)]
+    #[payable("*")]
+    fn add_liquidity(&self, min_shares: BigUint) -> BigUint {
+        let payments = self.call_value().all_esdt_transfers();
+        require!(payments.len() > 0, "No payment");
+
+        let mut amounts = ManagedVec::<Self::Api, BigUint>::new();
+        let mut nb_valid_payments = 0usize;
+
+        for i in 0..self.nb_tokens().get() {
+            let token = self.tokens(i).get();
+            let mut amount = BigUint::zero();
+            for payment in payments.iter() {
+                if payment.token_identifier == token {
+                    amount += payment.amount;
+                    nb_valid_payments += 1;
+                }
+            }
+            amounts.push(amount);
+        }
+
+        require!(nb_valid_payments == payments.len(), "Invalid payment token");
+
+        let shares = self.do_add_liquidity(amounts);
+
+        require!(shares >= min_shares, "Max slippage exceeded");
+
+        self.send().direct_esdt(
+            &self.blockchain().get_caller(),
+            &self.lp_token().get(),
+            0u64,
+            &shares,
+        );
+
+        shares
+    }
+
+    #[endpoint(removeLiquidity)]
+    #[payable("*")]
+    fn remove_liquidity(
+        &self,
+        min_amounts: MultiValueEncoded<BigUint>,
+    ) -> MultiValueEncoded<EsdtTokenPayment> {
+        let (token_in, amount_in) = self.call_value().single_fungible_esdt();
+
+        require!(token_in == self.lp_token().get(), "Invalid payment token");
+
+        let min_amounts_vec = min_amounts.to_vec();
+        let amounts_out = self.do_remove_liquidity(&amount_in);
+
+        let mut payments_out = ManagedVec::<Self::Api, EsdtTokenPayment>::new();
+        let mut i = 0usize;
+        for amount_out in amounts_out.into_iter() {
+            let min_amount = min_amounts_vec.get(i).clone_value();
+            require!(&amount_out >= &min_amount, "Max sleepage exceeded");
+
+            payments_out.push(EsdtTokenPayment::new(
+                self.tokens(i).get(),
+                0u64,
+                amount_out.clone(),
+            ));
+
+            i += 1;
+        }
+
+        self.send()
+            .direct_multi(&self.blockchain().get_caller(), &payments_out);
+
+        payments_out.into()
+    }
+
+    #[endpoint(swap)]
+    #[payable("*")]
+    fn swap(&self, token_out: TokenIdentifier, min_amount_out: BigUint) -> EsdtTokenPayment {
+        let (token_in, amount_in) = self.call_value().single_fungible_esdt();
+
+        let amount_out = self.estimate_amount_out(
+            token_in,
+            amount_in,
+            token_out.clone(),
+            OptionalValue::Some(false),
+        );
+
+        require!(amount_out >= min_amount_out, "Max slippage exceeded");
+
+        let payment_out = EsdtTokenPayment::new(token_out, 0u64, amount_out);
+
+        self.send().direct_esdt(
+            &self.blockchain().get_caller(),
+            &payment_out.token_identifier,
+            payment_out.token_nonce,
+            &payment_out.amount,
+        );
+
+        payment_out
+    }
+
+    //
+    // Views
+    //
+
+    #[view(estimateAmountOut)]
+    fn estimate_amount_out(
+        &self,
+        token_in: TokenIdentifier,
+        amount_in: BigUint,
+        token_out: TokenIdentifier,
+        readonly: OptionalValue<bool>,
+    ) -> BigUint {
+        let index_token_in = self.get_token_index(&token_in);
+        let index_token_out = self.get_token_index(&token_out);
+
+        let amount_out = self.do_swap(
+            index_token_in,
+            index_token_out,
+            amount_in,
+            readonly.into_option().unwrap_or(true),
+        );
+
+        amount_out
+    }
+
+    //
+    // Callbacks
+    //
+
+    #[callback]
+    fn lp_token_issue_callback(
+        &self,
+        caller: &ManagedAddress,
+        #[call_result] result: ManagedAsyncCallResult<()>,
+    ) {
+        let (token_id, returned_tokens) = self.call_value().egld_or_single_fungible_esdt();
+        match result {
+            ManagedAsyncCallResult::Ok(()) => {
+                let esdt = token_id.unwrap_esdt();
+                self.lp_token().set(&esdt);
+                self.send().direct_esdt(caller, &esdt, 0, &returned_tokens);
+            }
+            ManagedAsyncCallResult::Err(_) => {
+                if token_id.is_egld() && returned_tokens > 0u64 {
+                    self.send().direct_egld(caller, &returned_tokens);
+                }
+            }
+        }
+    }
+
+    //
     // Functions
     //
 
-    /// Swap dx amount of token i for token j
-    ///
-    /// i: Index of token in
-    /// j: Index of token out
-    /// dx: Token in amount
-    /// return dy
-    fn do_swap(&self, i: usize, j: usize, dx: BigUint) -> BigUint {
-        require!(i != j, "i = j");
+    fn get_token_index(&self, token: &TokenIdentifier) -> usize {
+        let mut found = false;
+        let mut index_ = 0usize;
 
-        // Calculate dy
-        let xp = self.get_xp();
-        let x = xp.get(i).clone_value() + &dx * &self.multipliers(i).get();
-
-        let y0 = xp.get(j).clone_value();
-        let y1 = self.amm_get_y(i, j, x, xp);
-
-        // y0 must be >= y1, since x has increased
-        // -1 to round down
-        let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
-
-        // Subtract fee from dy
-        let fee = self.calculate_swap_fee(&dy);
-        dy -= fee;
-
-        self.balances(i).update(|x| *x += &dx);
-        self.balances(j).update(|x| *x -= &dy);
-
-        dy
-    }
-
-    fn do_remove_liquidity(&self, shares: BigUint) -> ManagedVec<Self::Api, BigUint> {
-        let total_supply = self.lp_token_supply().get();
-        let n = self.nb_tokens().get();
-        let mut amounts_out = ManagedVec::<Self::Api, BigUint>::new();
-
-        for i in 0..n {
-            let balance = self.balances(i).get();
-            let amount_out = (&balance * &shares) / &total_supply;
-
-            self.balances(i).set(&(&balance - &amount_out));
-            amounts_out.push(amount_out);
+        for i in 0..self.nb_tokens().get() {
+            if &self.tokens(i).get() == token {
+                index_ = i;
+                found = true;
+            }
         }
+        require!(found, "Invalid token");
 
-        self.lp_burn(&shares);
-
-        amounts_out
-    }
-
-    /// Withdraw liquidity in token i
-    ///
-    /// shares: Shares to burn
-    /// i: Token to withdraw
-    fn remove_liquidity_one_token(&self, shares: BigUint, i: usize) -> BigUint {
-        let (amount_out, _) = self.calculate_withdraw_one_token(&shares, i);
-
-        self.balances(i).update(|x| *x -= &amount_out);
-        self.lp_burn(&shares);
-
-        amount_out
+        index_
     }
 
     //

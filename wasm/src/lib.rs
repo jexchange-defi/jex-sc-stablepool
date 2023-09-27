@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                            2
-// Async Callback (empty):               1
-// Total number of exported functions:   4
+// Endpoints:                            9
+// Async Callback:                       1
+// Total number of exported functions:  11
 
 #![no_std]
 
@@ -22,9 +22,16 @@ multiversx_sc_wasm_adapter::endpoints! {
     jex_sc_stablepool
     (
         init => init
+        setSwapFee => set_swap_fee
+        issueLpToken => issue_lp_token
+        enableMintBurn => enable_mint_burn
+        addLiquidity => add_liquidity
+        removeLiquidity => remove_liquidity
+        swap => swap
+        estimateAmountOut => estimate_amount_out
         getVirtualPrice => get_virtual_price
         isPaused => is_paused
     )
 }
 
-multiversx_sc_wasm_adapter::async_callback_empty! {}
+multiversx_sc_wasm_adapter::async_callback! { jex_sc_stablepool }

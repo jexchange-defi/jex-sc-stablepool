@@ -45,7 +45,7 @@ pub trait AmmModule: super::maths::MathsModule {
             }
 
             d_prev = d.clone();
-            d = ((s.clone() * &a + &p * &n_big) * &d) / (&d * &(&a - 1u32) + p * (&n_big + 1u32));
+            d = ((s.clone() * &a + &n_big * &p) * &d) / (&d * &(&a - 1u32) + p * (&n_big + 1u32));
 
             if self.abs_diff(&d, &d_prev) <= 1 {
                 return d;

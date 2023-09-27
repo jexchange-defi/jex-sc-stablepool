@@ -1,0 +1,37 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:LPJ3USD-000000": {
+              "roles": ["ESDTRoleLocalBurn", "ESDTRoleLocalMint"]
+            }
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:liquidity_fee": "112",
+            "str:lp_token": "str:LPJ3USD-000000",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1,000000000000",
+            "str:multipliers|u32:2": "1,000000000000",
+            "str:nb_tokens": "3",
+            "str:swap_fee": "300",
+            "str:tokens|u32:0": "str:BUSD-000000",
+            "str:tokens|u32:1": "str:USDC-000000",
+            "str:tokens|u32:2": "str:USDT-000000"
+          }
+        }
+      }
+    }
+  ]
+}

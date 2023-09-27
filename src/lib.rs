@@ -160,7 +160,7 @@ pub trait JexScStablepoolContract:
         let mut i = 0usize;
         for amount_out in amounts_out.into_iter() {
             let min_amount = min_amounts_vec.get(i).clone_value();
-            require!(&amount_out >= &min_amount, "Max sleepage exceeded");
+            require!(&amount_out >= &min_amount, "Max slippage exceeded");
 
             payments_out.push(EsdtTokenPayment::new(
                 self.tokens(i).get(),

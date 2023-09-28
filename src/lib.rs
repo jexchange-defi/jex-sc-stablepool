@@ -28,7 +28,7 @@ pub trait JexScStablepoolContract:
     fn init(
         &self,
         amp_factor: u32,
-        tokens_and_multipliers: MultiValueEncoded<(TokenIdentifier, BigUint)>,
+        tokens_and_multipliers: MultiValueEncoded<MultiValue2<TokenIdentifier, BigUint>>,
     ) {
         self.amp_factor().set_if_empty(amp_factor);
 
@@ -36,7 +36,8 @@ pub trait JexScStablepoolContract:
             self.nb_tokens().set(tokens_and_multipliers.len());
 
             let mut i = 0usize;
-            for (token, multiplier) in tokens_and_multipliers {
+            for multi_value in tokens_and_multipliers {
+                let (token, multiplier) = multi_value.into_tuple();
                 self.tokens(i).set(&token);
                 self.multipliers(i).set(&multiplier);
                 i += 1;

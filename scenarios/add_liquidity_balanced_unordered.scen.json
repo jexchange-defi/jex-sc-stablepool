@@ -1,0 +1,90 @@
+{
+  "steps": [
+    {
+      "step": "externalSteps",
+      "path": "init.scen.json"
+    },
+    {
+      "step": "setState",
+      "accounts": {
+        "address:user": {
+          "nonce": "0",
+          "balance": "0",
+          "esdt": {
+            "str:BUSD-000000": "10000,000000000000000000",
+            "str:USDC-000000": "10000,000000",
+            "str:USDT-000000": "10000,000000"
+          }
+        }
+      }
+    },
+    {
+      "step": "scCall",
+      "tx": {
+        "from": "address:user",
+        "to": "sc:pool",
+        "function": "addLiquidity",
+        "esdtValue": [
+          {
+            "tokenIdentifier": "str:USDT-000000",
+            "value": "10000,000000"
+          },
+          {
+            "tokenIdentifier": "str:BUSD-000000",
+            "value": "10000,000000000000000000"
+          },
+          {
+            "tokenIdentifier": "str:USDC-000000",
+            "value": "10000,000000"
+          }
+        ],
+        "arguments": ["99,000000000000000000"],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "status": "0",
+        "message": "",
+        "out": "30000,000000000000000000",
+        "gas": "*",
+        "refund": "*"
+      }
+    },
+    {
+      "step": "checkState",
+      "accounts": {
+        "address:user": {
+          "nonce": "*",
+          "balance": "0",
+          "esdt": {
+            "str:BUSD-000000": "",
+            "str:USDC-000000": "",
+            "str:USDT-000000": "",
+            "str:LPJ3USD-000000": "30000,000000000000000000"
+          }
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "*",
+          "esdt": {
+            "str:BUSD-000000": "10000,000000000000000000",
+            "str:USDC-000000": "10000,000000",
+            "str:USDT-000000": "10000,000000",
+            "str:LPJ3USD-000000": {
+              "roles": ["ESDTRoleLocalBurn", "ESDTRoleLocalMint"]
+            }
+          },
+          "storage": {
+            "str:reserves|u32:0": "10000,000000000000000000",
+            "str:reserves|u32:1": "10000,000000",
+            "str:reserves|u32:2": "10000,000000",
+            "str:lp_token_supply": "30000,000000000000000000",
+            "+": "*"
+          }
+        },
+        "+": ""
+      }
+    }
+  ]
+}

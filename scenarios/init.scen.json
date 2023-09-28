@@ -7,6 +7,10 @@
           "nonce": "0",
           "balance": "0"
         },
+        "address:platform_fees": {
+          "nonce": "0",
+          "balance": "0"
+        },
         "sc:pool": {
           "nonce": "0",
           "balance": "0",
@@ -25,6 +29,7 @@
             "str:multipliers|u32:1": "1,000000000000",
             "str:multipliers|u32:2": "1,000000000000",
             "str:nb_tokens": "3",
+            "str:platform_fees_receiver": "address:platform_fees",
             "str:swap_fee": "300",
             "str:tokens|u32:0": "str:BUSD-000000",
             "str:tokens|u32:1": "str:USDC-000000",

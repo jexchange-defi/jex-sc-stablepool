@@ -49,6 +49,12 @@ pub trait JexScStablepoolContract:
     //
 
     #[only_owner]
+    #[endpoint(configurePlatformFeesReceiver)]
+    fn configure_platform_fees_receiver(&self, receiver: &ManagedAddress) {
+        self.do_configure_platform_fees_receiver(receiver);
+    }
+
+    #[only_owner]
     #[endpoint(setSwapFee)]
     fn set_swap_fee(&self, swap_fee: u32) {
         self.update_swap_fee(self.nb_tokens().get(), swap_fee);
@@ -215,7 +221,7 @@ pub trait JexScStablepoolContract:
         let index_token_in = self.get_token_index(&token_in);
         let index_token_out = self.get_token_index(&token_out);
 
-        let (amount_out, fee) =
+        let (amount_out, lp_fee, platform_fee) =
             self.do_swap(index_token_in, index_token_out, amount_in.clone(), false);
 
         require!(amount_out >= min_amount_out, "Max slippage exceeded");
@@ -229,7 +235,16 @@ pub trait JexScStablepoolContract:
             &payment_out.amount,
         );
 
-        self.analytics_add_lp_fees(&payment_out.token_identifier, &fee);
+        if &platform_fee > &0 {
+            self.send().direct_esdt(
+                &self.platform_fees_receiver().get(),
+                &payment_out.token_identifier,
+                payment_out.token_nonce,
+                &platform_fee,
+            );
+        }
+
+        self.analytics_add_lp_fees(&payment_out.token_identifier, &lp_fee);
         self.analytics_add_volume(&token_in, &amount_in);
         self.analytics_add_volume(&payment_out.token_identifier, &payment_out.amount);
 
@@ -250,7 +265,7 @@ pub trait JexScStablepoolContract:
         let index_token_in = self.get_token_index(&token_in);
         let index_token_out = self.get_token_index(&token_out);
 
-        let (amount_out, _) = self.do_swap(index_token_in, index_token_out, amount_in, true);
+        let (amount_out, _, _) = self.do_swap(index_token_in, index_token_out, amount_in, true);
 
         amount_out
     }

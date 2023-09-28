@@ -43,6 +43,14 @@
     {
       "step": "checkState",
       "accounts": {
+        "address:platform_fees": {
+          "nonce": "0",
+          "balance": "0",
+          "esdt": {
+            "str:BUSD-000000": "",
+            "str:USDC-000000": "0,000098"
+          }
+        },
         "address:user2": {
           "nonce": "*",
           "balance": "0",
@@ -57,7 +65,7 @@
           "code": "*",
           "esdt": {
             "str:BUSD-000000": "10001,000000000000000000",
-            "str:USDC-000000": "9999,000300",
+            "str:USDC-000000": "9999,000202",
             "str:USDT-000000": "10000,000000",
             "str:LPJ3USD-000000": {
               "roles": ["ESDTRoleLocalBurn", "ESDTRoleLocalMint"]
@@ -66,9 +74,9 @@
           "storage": {
             "str:an_t_vol|u64:444|nested:str:BUSD-000000": "1,000000000000000000",
             "str:an_t_vol|u64:444|nested:str:USDC-000000": "0,999700",
-            "str:an_lp_fees|u64:444|nested:str:USDC-000000": "0,000299",
+            "str:an_lp_fees|u64:444|nested:str:USDC-000000": "0,000201",
             "str:reserves|u32:0": "10001,000000000000000000",
-            "str:reserves|u32:1": "9999,000300",
+            "str:reserves|u32:1": "9999,000202",
             "str:reserves|u32:2": "10000,000000",
             "str:lp_token_supply": "30000,000000000000000000",
             "+": ""

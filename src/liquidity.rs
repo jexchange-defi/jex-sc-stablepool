@@ -165,8 +165,14 @@ pub trait LiquidityModule:
     /// j: Index of token out
     /// dx: Token in amount
     ///
-    /// return (dy, fee)
-    fn do_swap(&self, i: usize, j: usize, dx: BigUint, readonly: bool) -> (BigUint, BigUint) {
+    /// return (dy, lp fee, platform fee)
+    fn do_swap(
+        &self,
+        i: usize,
+        j: usize,
+        dx: BigUint,
+        readonly: bool,
+    ) -> (BigUint, BigUint, BigUint) {
         require!(i != j, "i = j");
 
         // Calculate dy
@@ -181,15 +187,16 @@ pub trait LiquidityModule:
         let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
 
         // Subtract fee from dy
-        let fee = self.calculate_swap_fee(&dy);
-        dy -= &fee;
+        let (lp_fee, platform_fee) = self.calculate_swap_fee(&dy);
+        dy -= &lp_fee;
 
         if !readonly {
             self.reserves(i).update(|x| *x += &dx);
             self.reserves(j).update(|x| *x -= &dy);
         }
 
-        (dy, fee)
+        dy -= &platform_fee; // platform fee leaves the pool
+        (dy, lp_fee, platform_fee)
     }
 
     /// Withdraw liquidity in token i

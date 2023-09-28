@@ -3,6 +3,7 @@
 multiversx_sc::imports!();
 
 mod amm;
+mod analytics;
 mod fees;
 mod liquidity;
 mod maths;
@@ -12,6 +13,7 @@ mod pausable;
 #[multiversx_sc::contract]
 pub trait JexScStablepoolContract:
     amm::AmmModule
+    + analytics::AnalyticsModule
     + fees::FeesModule
     + liquidity::LiquidityModule
     + maths::MathsModule
@@ -213,7 +215,8 @@ pub trait JexScStablepoolContract:
         let index_token_in = self.get_token_index(&token_in);
         let index_token_out = self.get_token_index(&token_out);
 
-        let amount_out = self.do_swap(index_token_in, index_token_out, amount_in, false);
+        let (amount_out, fee) =
+            self.do_swap(index_token_in, index_token_out, amount_in.clone(), false);
 
         require!(amount_out >= min_amount_out, "Max slippage exceeded");
 
@@ -225,6 +228,10 @@ pub trait JexScStablepoolContract:
             payment_out.token_nonce,
             &payment_out.amount,
         );
+
+        self.analytics_add_lp_fees(&payment_out.token_identifier, &fee);
+        self.analytics_add_volume(&token_in, &amount_in);
+        self.analytics_add_volume(&payment_out.token_identifier, &payment_out.amount);
 
         payment_out
     }
@@ -243,7 +250,7 @@ pub trait JexScStablepoolContract:
         let index_token_in = self.get_token_index(&token_in);
         let index_token_out = self.get_token_index(&token_out);
 
-        let amount_out = self.do_swap(index_token_in, index_token_out, amount_in, true);
+        let (amount_out, _) = self.do_swap(index_token_in, index_token_out, amount_in, true);
 
         amount_out
     }
@@ -273,6 +280,20 @@ pub trait JexScStablepoolContract:
         let amount_out = self.do_remove_liquidity_one_token(shares, index_token_out, true);
 
         amount_out
+    }
+
+    #[view(getAnalyticsForLastEpochs)]
+    fn get_analytics_for_last_epochs(
+        &self,
+        countback: u64,
+    ) -> MultiValueEncoded<Self::Api, analytics::AnalyticsForEpoch<Self::Api>> {
+        let tokens = (0..self.nb_tokens().get())
+            .map(|i| self.tokens(i).get())
+            .collect();
+
+        let res = self.do_get_analytics_for_last_epochs(countback, tokens);
+
+        res.into()
     }
 
     //

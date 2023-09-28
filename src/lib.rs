@@ -118,6 +118,8 @@ pub trait JexScStablepoolContract:
     #[endpoint(addLiquidity)]
     #[payable("*")]
     fn add_liquidity(&self, min_shares: BigUint) -> BigUint {
+        self.require_not_paused();
+
         let payments = self.call_value().all_esdt_transfers();
         require!(payments.len() > 0, "No payment");
 
@@ -217,6 +219,8 @@ pub trait JexScStablepoolContract:
     #[endpoint(swap)]
     #[payable("*")]
     fn swap(&self, token_out: TokenIdentifier, min_amount_out: BigUint) -> EsdtTokenPayment {
+        self.require_not_paused();
+
         let (token_in, amount_in) = self.call_value().single_fungible_esdt();
 
         let index_token_in = self.get_token_index(&token_in);
@@ -263,6 +267,8 @@ pub trait JexScStablepoolContract:
         amount_in: BigUint,
         token_out: TokenIdentifier,
     ) -> BigUint {
+        self.require_not_paused();
+
         let index_token_in = self.get_token_index(&token_in);
         let index_token_out = self.get_token_index(&token_out);
 
@@ -273,6 +279,8 @@ pub trait JexScStablepoolContract:
 
     #[view(estimateAddLiquidity)]
     fn estimate_add_liquidity(&self, amounts: MultiValueEncoded<BigUint>) -> BigUint {
+        self.require_not_paused();
+
         let shares = self.do_add_liquidity(amounts.to_vec(), true);
 
         shares

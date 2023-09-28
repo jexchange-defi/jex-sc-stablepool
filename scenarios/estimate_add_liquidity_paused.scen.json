@@ -1,0 +1,30 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {},
+          "storage": {
+            "str:paused": "true"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["0", "100,000000", "50,000000"]
+      },
+      "expect": {
+        "status": "4",
+        "message": "str:Contract is paused"
+      }
+    }
+  ]
+}

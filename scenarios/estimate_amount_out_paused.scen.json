@@ -1,0 +1,35 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {},
+          "owner": "address:owner",
+          "storage": {
+            "str:paused": "true"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountOut",
+        "arguments": [
+          "str:BUSD-000000",
+          "1000,000000000000000000",
+          "str:USDC-000000"
+        ]
+      },
+      "expect": {
+        "status": "4",
+        "message": "str:Contract is paused"
+      }
+    }
+  ]
+}

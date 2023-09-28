@@ -43,6 +43,8 @@ pub trait JexScStablepoolContract:
                 i += 1;
             }
         }
+
+        self.do_pause();
     }
 
     //
@@ -109,6 +111,18 @@ pub trait JexScStablepoolContract:
             .set_special_roles(&sc_address, &lp_token, roles.iter().cloned())
             .async_call()
             .call_and_exit();
+    }
+
+    #[only_owner]
+    #[endpoint]
+    fn pause(&self) {
+        self.do_pause();
+    }
+
+    #[only_owner]
+    #[endpoint]
+    fn resume(&self) {
+        self.do_unpause();
     }
 
     //

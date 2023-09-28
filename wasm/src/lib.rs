@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           17
+// Endpoints:                           19
 // Async Callback:                       1
-// Total number of exported functions:  19
+// Total number of exported functions:  21
 
 #![no_std]
 
@@ -26,6 +26,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         setSwapFee => set_swap_fee
         issueLpToken => issue_lp_token
         enableMintBurn => enable_mint_burn
+        pause => pause
+        resume => resume
         addLiquidity => add_liquidity
         removeLiquidity => remove_liquidity
         removeLiquidityOneToken => remove_liquidity_one_token

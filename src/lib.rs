@@ -1,6 +1,7 @@
 #![no_std]
 
 multiversx_sc::imports!();
+multiversx_sc::derive_imports!();
 
 mod amm;
 mod analytics;
@@ -8,6 +9,22 @@ mod fees;
 mod liquidity;
 mod maths;
 mod pausable;
+
+#[derive(TopEncode, TopDecode, TypeAbi)]
+pub struct PairStatus<M: ManagedTypeApi> {
+    paused: bool,
+    nb_tokens: usize,
+    tokens: ManagedVec<M, TokenIdentifier<M>>,
+    reserves: ManagedVec<M, BigUint<M>>,
+    lp_token_identifier: TokenIdentifier<M>,
+    lp_token_supply: BigUint<M>,
+    owner: ManagedAddress<M>,
+    swap_fee: u32,
+    platform_fees_receiver: Option<ManagedAddress<M>>,
+    volume_prev_epoch: ManagedVec<M, BigUint<M>>,
+    fees_prev_epoch: ManagedVec<M, BigUint<M>>,
+    fees_last_7_epochs: ManagedVec<M, BigUint<M>>,
+}
 
 /// An empty contract. To be used as a template when starting a new contract from scratch.
 #[multiversx_sc::contract]
@@ -332,6 +349,62 @@ pub trait JexScStablepoolContract:
         let res = self.do_get_analytics_for_last_epochs(countback, tokens);
 
         res.into()
+    }
+
+    #[view(getStatus)]
+    fn get_status(&self) -> PairStatus<Self::Api> {
+        let prev_epoch = self.blockchain().get_block_epoch() - 1u64;
+
+        let nb_tokens = self.nb_tokens().get();
+
+        let tokens: ManagedVec<Self::Api, TokenIdentifier> = (0..nb_tokens)
+            .into_iter()
+            .map(|i| self.tokens(i).get())
+            .collect();
+
+        let reserves: ManagedVec<Self::Api, BigUint> = (0..nb_tokens)
+            .into_iter()
+            .map(|i| self.reserves(i).get())
+            .collect();
+
+        let opt_platform_fees_receiver = if self.platform_fees_receiver().is_empty() {
+            Option::None
+        } else {
+            Option::Some(self.platform_fees_receiver().get())
+        };
+
+        let mut volume_prev_epoch = ManagedVec::<Self::Api, BigUint>::new();
+        let mut fees_prev_epoch = ManagedVec::<Self::Api, BigUint>::new();
+        for token in tokens.iter() {
+            volume_prev_epoch.push(self.trading_volume(prev_epoch, &token).get());
+            fees_prev_epoch.push(self.lp_fees(prev_epoch, &token).get());
+        }
+
+        let mut fees_last_7_epochs = ManagedVec::<Self::Api, BigUint>::new();
+        for token in tokens.iter() {
+            let mut sum_lp_fees = BigUint::zero();
+            for i in 0u64..=6u64 {
+                sum_lp_fees += self.lp_fees(prev_epoch - i, &token).get();
+            }
+            fees_last_7_epochs.push(sum_lp_fees);
+        }
+
+        let status = PairStatus {
+            paused: self.is_paused().get(),
+            nb_tokens,
+            tokens,
+            reserves,
+            lp_token_identifier: self.lp_token().get(),
+            lp_token_supply: self.lp_token_supply().get(),
+            owner: self.blockchain().get_owner_address(),
+            swap_fee: self.swap_fee().get(),
+            platform_fees_receiver: opt_platform_fees_receiver,
+            volume_prev_epoch,
+            fees_prev_epoch,
+            fees_last_7_epochs,
+        };
+
+        status
     }
 
     //

@@ -1,0 +1,116 @@
+##
+# Info
+##
+
+echo "Proxy: ${PROXY}"
+echo "SC address: ${SC_ADDRESS:-Not deployed}"
+
+##
+# Owner endpoints
+##
+
+configurePlatformFeesReceiver() {
+    read -p "Receiver address: " RECEIVER_ADDRESS
+
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="configurePlatformFeesReceiver" \
+        --arguments "${RECEIVER_ADDRESS}" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+setSwapFee() {
+    read -p "Swap fee (10000=1%, 300=0.03%): " SWAP_FEE
+
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="setSwapFee" \
+        --arguments "${SWAP_FEE}" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+issueLpToken() {
+    read -p 'Display name: ' DISPLAY_NAME
+    read -p 'Ticker: ' TICKER
+
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=75000000 \
+        --function="issueLpToken" \
+        --arguments "str:${DISPLAY_NAME}" "str:${TICKER}" \
+        --value 50000000000000000 \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+enableMintBurn() {
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=75000000 \
+        --function="enableMintBurn" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+pause() {
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="pause" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+resume() {
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="resume" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+##
+# Public endpoints
+##
+
+addLiquidity() {
+    USER_ADDRESS=$(mxpy wallet pem-address ${1})
+
+    read -p "Nb tokens: " NB_TOKENS
+
+    PAYMENTS=""
+    for i in $(seq 1 ${NB_TOKENS})
+    do
+        read -p "$i) Token: " TOKEN
+        read -p "$i) Amount: " AMOUNT
+
+        PAYMENTS="${PAYMENTS} str:${TOKEN} 0 ${AMOUNT}"
+    done
+
+    mxpy contract call ${USER_ADDRESS} --recall-nonce --pem=${1} --gas-limit=10000000 \
+        --function="MultiESDTNFTTransfer" \
+        --arguments "${SC_ADDRESS}" "${NB_TOKENS}" \
+            ${PAYMENTS} \
+            "str:addLiquidity" \
+            "1" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+swap() {
+    read -p "Token IN: " TOKEN_IN
+    read -p "Amount IN: " AMOUNT_IN
+    read -p "Token OUT: " TOKEN_OUT
+
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --pem=${1} --gas-limit=10000000 \
+        --function="ESDTTransfer" \
+        --arguments "str:${TOKEN_IN}" "${AMOUNT_IN}" \
+            "str:swap" "str:${TOKEN_OUT}" "1" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+##
+# Views
+##
+
+estimateAmountOut() {
+    read -p "Token IN: " TOKEN_IN
+    read -p "Amount IN: " AMOUNT_IN
+    read -p "Token OUT: " TOKEN_OUT
+
+    mxpy --verbose contract query ${SC_ADDRESS} \
+        --function "estimateAmountOut" \
+        --arguments "str:${TOKEN_IN}" "${AMOUNT_IN}" "str:${TOKEN_OUT}" \
+        --proxy=${PROXY} | jq .[].number
+}
+
+getStatus() {
+    mxpy --verbose contract query ${SC_ADDRESS} --function "getStatus" --proxy=${PROXY} \
+        | jq .[].hex
+}

@@ -13,6 +13,7 @@ mod pausable;
 #[derive(TopEncode, TopDecode, TypeAbi)]
 pub struct PairStatus<M: ManagedTypeApi> {
     paused: bool,
+    amp_factor: u32,
     nb_tokens: usize,
     tokens: ManagedVec<M, TokenIdentifier<M>>,
     reserves: ManagedVec<M, BigUint<M>>,
@@ -391,6 +392,7 @@ pub trait JexScStablepoolContract:
 
         let status = PairStatus {
             paused: self.is_paused().get(),
+            amp_factor: self.amp_factor().get(),
             nb_tokens,
             tokens,
             reserves,

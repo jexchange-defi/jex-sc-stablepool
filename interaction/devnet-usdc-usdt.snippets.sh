@@ -3,11 +3,10 @@
 BYTECODE=../output/jex-sc-stablepool.wasm
 KEYFILE="../../wallets/deployer-shard1.json"
 PROXY=https://devnet-gateway.multiversx.com
-SC_ADDRESS=$(mxpy data load --key=address-devnet-3usd)
+SC_ADDRESS=$(mxpy data load --key=address-devnet-usdc-usdt)
 CHAIN=D
 SCRIPT_DIR=$(dirname $0)
 AMP_FACTOR=256
-BUSD_ID=BUSD-632f7d
 USDC_ID=USDC-8d4068
 USDT_ID=USDT-188935
 
@@ -19,7 +18,6 @@ deploy() {
 
     mxpy contract deploy --bytecode=${BYTECODE} --metadata-payable \
         --arguments "${AMP_FACTOR}" \
-            "str:${BUSD_ID}" "1" \
             "str:${USDC_ID}" "1000000000000" \
             "str:${USDT_ID}" "1000000000000" \
         --keyfile=${KEYFILE} --gas-limit=75000000 --outfile="deploy-devnet.interaction.json" \
@@ -27,7 +25,7 @@ deploy() {
 
     SC_ADDRESS=$(mxpy data parse --file="deploy-devnet.interaction.json" --expression="data['contractAddress']")
 
-    mxpy data store --key=address-devnet-3usd --value=${SC_ADDRESS}
+    mxpy data store --key=address-devnet-usdc-usdt --value=${SC_ADDRESS}
 
     echo ""
     echo "Smart contract address: ${SC_ADDRESS}"

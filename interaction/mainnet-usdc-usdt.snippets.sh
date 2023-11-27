@@ -42,7 +42,7 @@ upgrade() {
     echo 'You are about to upgrade current SC on mainnet (Ctrl-C to abort)'
     read answer
 
-    mxpy contract upgrade --bytecode=${BYTECODE} --metadata-payable \
+    mxpy contract upgrade --bytecode=${BYTECODE} --metadata-payable --metadata-not-upgradeable \
         --arguments "0x" \
             "0x" "0x" \
         --keyfile=${KEYFILE} --gas-limit=75000000 --outfile="deploy-mainnet.interaction.json" \

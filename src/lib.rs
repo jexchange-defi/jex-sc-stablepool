@@ -27,7 +27,6 @@ pub struct PairStatus<M: ManagedTypeApi> {
     fees_last_7_epochs: ManagedVec<M, BigUint<M>>,
 }
 
-/// An empty contract. To be used as a template when starting a new contract from scratch.
 #[multiversx_sc::contract]
 pub trait JexScStablepoolContract:
     amm::AmmModule

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - check number of tokens during deployment
 - check amplification factor during deployment
 - use constant to save redundant calculus
+- check minimum amount out > 0
 
 ## [1.0.0]
 

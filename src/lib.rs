@@ -255,6 +255,8 @@ pub trait JexScStablepoolContract:
     #[endpoint(swap)]
     #[payable("*")]
     fn swap(&self, token_out: TokenIdentifier, min_amount_out: BigUint) -> EsdtTokenPayment {
+        require!(min_amount_out > 1, "Invalid min amount to receive");
+
         self.require_not_paused();
 
         let (token_in, amount_in) = self.call_value().single_fungible_esdt();

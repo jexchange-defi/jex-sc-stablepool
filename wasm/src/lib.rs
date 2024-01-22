@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           21
+// Endpoints:                           31
 // Async Callback:                       1
-// Total number of exported functions:  23
+// Total number of exported functions:  33
 
 #![no_std]
 #![allow(internal_features)]
@@ -37,9 +37,19 @@ multiversx_sc_wasm_adapter::endpoints! {
         estimateRemoveLiquidityOneToken => estimate_remove_liquidity_one_token
         getAnalyticsForLastEpochs => get_analytics_for_last_epochs
         getStatus => get_status
+        getTokens => tokens
+        getAmpFactor => amp_factor
         getFees => lp_fees
         getTradingVolume => trading_volume
+        getLiquidityFee => liquidity_fee
+        getPlatformFeesReceiver => platform_fees_receiver
+        getSwapFee => swap_fee
         getVirtualPrice => get_virtual_price
+        getReserves => reserves
+        getLpTokenSupply => lp_token_supply
+        getLptoken => lp_token
+        getmultipliers => multipliers
+        getNbTokens => nb_tokens
         isPaused => is_paused
     )
 }

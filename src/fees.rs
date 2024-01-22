@@ -29,12 +29,15 @@ pub trait FeesModule {
         self.liquidity_fee().set(&liquidity_fee);
     }
 
+    #[view(getLiquidityFee)]
     #[storage_mapper("liquidity_fee")]
     fn liquidity_fee(&self) -> SingleValueMapper<u32>;
 
+    #[view(getPlatformFeesReceiver)]
     #[storage_mapper("platform_fees_receiver")]
     fn platform_fees_receiver(&self) -> SingleValueMapper<ManagedAddress>;
 
+    #[view(getSwapFee)]
     #[storage_mapper("swap_fee")]
     fn swap_fee(&self) -> SingleValueMapper<u32>;
 }

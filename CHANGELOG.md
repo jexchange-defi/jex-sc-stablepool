@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0]
 
+### Added
+
+- add view on all storage mappers
+
 ### Changed
 
 - update to `sdk-rs 0.45.2`

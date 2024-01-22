@@ -238,18 +238,23 @@ pub trait LiquidityModule:
         self.send().esdt_local_mint(&lp_token, 0, amount);
     }
 
+    #[view(getReserves)]
     #[storage_mapper("reserves")]
     fn reserves(&self, i: usize) -> SingleValueMapper<BigUint>;
 
+    #[view(getLpTokenSupply)]
     #[storage_mapper("lp_token_supply")]
     fn lp_token_supply(&self) -> SingleValueMapper<BigUint>;
 
+    #[view(getLptoken)]
     #[storage_mapper("lp_token")]
     fn lp_token(&self) -> SingleValueMapper<TokenIdentifier>;
 
+    #[view(getmultipliers)]
     #[storage_mapper("multipliers")]
     fn multipliers(&self, i: usize) -> SingleValueMapper<BigUint>;
 
+    #[view(getNbTokens)]
     #[storage_mapper("nb_tokens")]
     fn nb_tokens(&self) -> SingleValueMapper<usize>;
 }

@@ -470,6 +470,7 @@ pub trait JexScStablepoolContract:
     // Storage
     //
 
+    #[view(getTokens)]
     #[storage_mapper("tokens")]
     fn tokens(&self, i: usize) -> SingleValueMapper<TokenIdentifier>;
 }

@@ -171,6 +171,7 @@ pub trait AmmModule: super::maths::MathsModule {
         sc_panic!("y didn't converge");
     }
 
+    #[view(getAmpFactor)]
     #[storage_mapper("amp_factor")]
     fn amp_factor(&self) -> SingleValueMapper<u32>;
 }

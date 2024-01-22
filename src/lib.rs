@@ -55,8 +55,7 @@ pub trait JexScStablepoolContract:
 
         self.nb_tokens().set(tokens_and_multipliers.len());
 
-        let mut i = 0usize;
-        for multi_value in tokens_and_multipliers {
+        for (i, multi_value) in tokens_and_multipliers.into_iter().enumerate() {
             let (token, multiplier) = multi_value.into_tuple();
             self.tokens(i).set(&token);
             self.multipliers(i).set(&multiplier);
@@ -65,8 +64,6 @@ pub trait JexScStablepoolContract:
             for j in 0usize..i {
                 require!(self.tokens(j).get() != token, "Tokens must be different");
             }
-
-            i += 1;
         }
 
         self.do_pause();

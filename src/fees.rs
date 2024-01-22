@@ -5,7 +5,9 @@ const FEE_DENOMINATOR: u64 = 1_000000u64;
 #[multiversx_sc::module]
 pub trait FeesModule {
     fn calculate_liquidity_fee(&self, amount: &BigUint) -> BigUint {
-        return amount * self.liquidity_fee().get() / FEE_DENOMINATOR;
+        let num = amount * self.liquidity_fee().get();
+
+        num / FEE_DENOMINATOR
     }
 
     // return (lp fee, platform fee)

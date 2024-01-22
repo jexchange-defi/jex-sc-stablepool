@@ -249,6 +249,7 @@ pub trait JexScStablepoolContract:
             payment_out.token_nonce,
             &payment_out.amount,
         );
+
         payment_out
     }
 
@@ -396,7 +397,7 @@ pub trait JexScStablepoolContract:
             fees_last_7_epochs.push(sum_lp_fees);
         }
 
-        let status = PairStatus {
+        PairStatus {
             paused: self.is_paused().get(),
             amp_factor: self.amp_factor().get(),
             nb_tokens,
@@ -410,9 +411,7 @@ pub trait JexScStablepoolContract:
             volume_prev_epoch,
             fees_prev_epoch,
             fees_last_7_epochs,
-        };
-
-        status
+        }
     }
 
     //

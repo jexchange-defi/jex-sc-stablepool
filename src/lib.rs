@@ -60,6 +60,12 @@ pub trait JexScStablepoolContract:
             let (token, multiplier) = multi_value.into_tuple();
             self.tokens(i).set(&token);
             self.multipliers(i).set(&multiplier);
+
+            // check token has not been used already
+            for j in 0usize..i {
+                require!(self.tokens(j).get() != token, "Tokens must be different");
+            }
+
             i += 1;
         }
 

@@ -458,6 +458,7 @@ pub trait JexScStablepoolContract:
             if &self.tokens(i).get() == token {
                 index_ = i;
                 found = true;
+                break;
             }
         }
         require!(found, "Invalid token");

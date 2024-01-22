@@ -172,7 +172,7 @@ pub trait LiquidityModule:
         dx: BigUint,
         readonly: bool,
     ) -> (BigUint, BigUint, BigUint) {
-        require!(i != j, "i = j");
+        require!(i != j, "Tokens must be different");
 
         // Calculate dy
         let xp = self.get_xp();

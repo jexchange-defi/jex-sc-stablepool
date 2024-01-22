@@ -99,7 +99,6 @@ pub trait LiquidityModule:
         let d2: BigUint;
         if total_supply > 0 {
             for i in 0..n {
-                // TODO: why old_xs[i] * d1 / d0? why not d1 / N?
                 let ideal_balance = (old_xs.get(i).clone_value() * &d1) / &d0;
                 let diff = self.abs_diff(&new_xs.get(i).clone_value(), &ideal_balance);
                 let fee = self.calculate_liquidity_fee(&diff);

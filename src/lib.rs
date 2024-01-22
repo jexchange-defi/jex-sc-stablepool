@@ -209,7 +209,7 @@ pub trait JexScStablepoolContract:
         let mut payments_out = ManagedVec::<Self::Api, EsdtTokenPayment>::new();
         for (i, amount_out) in amounts_out.into_iter().enumerate() {
             let min_amount = min_amounts_vec.get(i).clone_value();
-            require!(&amount_out >= &min_amount, "Max slippage exceeded");
+            require!(amount_out >= min_amount, "Max slippage exceeded");
 
             payments_out.push(EsdtTokenPayment::new(
                 self.tokens(i).get(),

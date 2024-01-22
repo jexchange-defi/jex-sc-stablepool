@@ -92,7 +92,7 @@ pub trait LiquidityModule:
 
         // Calculate new liquidity d1
         let d1 = self.amm_get_d(&new_xs);
-        require!(&d1 > &d0, "liquidity didn't increase");
+        require!(d1 > d0, "liquidity didn't increase");
 
         // Recalcuate D accounting for fee on imbalance
         let mut new_xs2 = ManagedVec::<Self::Api, BigUint>::new();

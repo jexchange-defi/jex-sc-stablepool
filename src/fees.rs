@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-const FEE_DENOMINATOR: u64 = 1_000000u64;
+const FEE_DENOMINATOR: u64 = 1_000_000u64;
 
 #[multiversx_sc::module]
 pub trait FeesModule {

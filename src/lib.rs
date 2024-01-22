@@ -48,22 +48,23 @@ pub trait JexScStablepoolContract:
         amp_factor: u32,
         tokens_and_multipliers: MultiValueEncoded<MultiValue2<TokenIdentifier, BigUint>>,
     ) {
-        self.amp_factor().set_if_empty(amp_factor);
+        self.amp_factor().set(amp_factor);
 
-        if self.nb_tokens().is_empty() {
-            self.nb_tokens().set(tokens_and_multipliers.len());
+        self.nb_tokens().set(tokens_and_multipliers.len());
 
-            let mut i = 0usize;
-            for multi_value in tokens_and_multipliers {
-                let (token, multiplier) = multi_value.into_tuple();
-                self.tokens(i).set(&token);
-                self.multipliers(i).set(&multiplier);
-                i += 1;
-            }
+        let mut i = 0usize;
+        for multi_value in tokens_and_multipliers {
+            let (token, multiplier) = multi_value.into_tuple();
+            self.tokens(i).set(&token);
+            self.multipliers(i).set(&multiplier);
+            i += 1;
         }
 
         self.do_pause();
     }
+
+    #[upgrade]
+    fn upgrade(&self) {}
 
     //
     // owner endpoints

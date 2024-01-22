@@ -47,6 +47,8 @@ pub trait JexScStablepoolContract:
         amp_factor: u32,
         tokens_and_multipliers: MultiValueEncoded<MultiValue2<TokenIdentifier, BigUint>>,
     ) {
+        require!(tokens_and_multipliers.len() > 1, "Invalid number of tokens");
+
         self.amp_factor().set(amp_factor);
 
         self.nb_tokens().set(tokens_and_multipliers.len());

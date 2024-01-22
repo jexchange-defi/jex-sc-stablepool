@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           20
+// Endpoints:                           21
 // Async Callback:                       1
-// Total number of exported functions:  22
+// Total number of exported functions:  23
 
 #![no_std]
 #![allow(internal_features)]
@@ -20,6 +20,7 @@ multiversx_sc_wasm_adapter::endpoints! {
     jex_sc_stablepool
     (
         init => init
+        upgrade => upgrade
         configurePlatformFeesReceiver => configure_platform_fees_receiver
         setSwapFee => set_swap_fee
         issueLpToken => issue_lp_token

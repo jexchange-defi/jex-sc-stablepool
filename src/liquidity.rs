@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-const LP_TOKEN_DECIMALS: u32 = 18u32;
+const ONE_LP_TOKEN: u64 = 1_000_000_000_000_000_000u64;
 
 #[multiversx_sc::module]
 pub trait LiquidityModule:
@@ -15,7 +15,7 @@ pub trait LiquidityModule:
         let total_supply = self.lp_token_supply().get();
 
         if total_supply > 0 {
-            (d * BigUint::from(10u32).pow(LP_TOKEN_DECIMALS)) / total_supply
+            (d * BigUint::from(ONE_LP_TOKEN)) / total_supply
         } else {
             BigUint::zero()
         }

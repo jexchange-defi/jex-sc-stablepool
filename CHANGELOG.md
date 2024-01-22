@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - check number of tokens during deployment
+- check amplification factor during deployment
 
 ## [1.0.0]
 

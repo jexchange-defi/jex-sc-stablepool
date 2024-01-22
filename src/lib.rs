@@ -49,6 +49,8 @@ pub trait JexScStablepoolContract:
     ) {
         require!(tokens_and_multipliers.len() > 1, "Invalid number of tokens");
 
+        require!(amp_factor > 0, "Invalid amp factor");
+
         self.amp_factor().set(amp_factor);
 
         self.nb_tokens().set(tokens_and_multipliers.len());

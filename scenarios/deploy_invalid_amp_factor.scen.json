@@ -1,0 +1,46 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "1",
+          "balance": "0"
+        }
+      },
+      "newAddresses": [
+        {
+          "creatorAddress": "address:owner",
+          "creatorNonce": "1",
+          "newAddress": "sc:pool"
+        }
+      ]
+    },
+    {
+      "step": "scDeploy",
+      "id": "deploy",
+      "tx": {
+        "from": "address:owner",
+        "contractCode": "file:../output/jex-sc-stablepool.wasm",
+        "arguments": [
+          "0",
+          "str:BUSD-000000",
+          "1",
+          "str:USDC-000000",
+          "1,000000000000",
+          "str:USDT-000000",
+          "1,000000000000"
+        ],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "out": [],
+        "status": "4",
+        "message": "str:Invalid amp factor",
+        "gas": "*",
+        "refund": "*"
+      }
+    }
+  ]
+}

@@ -23,7 +23,7 @@ deploy() {
         --keyfile=${KEYFILE} --gas-limit=75000000 --outfile="deploy-devnet.interaction.json" \
         --proxy=${PROXY} --chain=${CHAIN} --recall-nonce --send || return
 
-    SC_ADDRESS=$(mxpy data parse --file="deploy-devnet.interaction.json" --expression="data['contractAddress']")
+    SC_ADDRESS=$(cat deploy-devnet.interaction.json | jq -r .contractAddress)
 
     mxpy data store --key=address-devnet-usdc-usdt --value=${SC_ADDRESS}
 

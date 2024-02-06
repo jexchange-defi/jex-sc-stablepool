@@ -61,7 +61,7 @@ resume() {
 ##
 
 addLiquidity() {
-    USER_ADDRESS=$(mxpy wallet pem-address ${1})
+    USER_ADDRESS=$(mxpy wallet convert --infile ${1} --in-format pem --out-format address-bech32 | tail -1)
 
     read -p "Nb tokens: " NB_TOKENS
 
@@ -73,6 +73,7 @@ addLiquidity() {
 
         PAYMENTS="${PAYMENTS} str:${TOKEN} 0 ${AMOUNT}"
     done
+    set -x
 
     mxpy contract call ${USER_ADDRESS} --recall-nonce --pem=${1} --gas-limit=10000000 \
         --function="MultiESDTNFTTransfer" \

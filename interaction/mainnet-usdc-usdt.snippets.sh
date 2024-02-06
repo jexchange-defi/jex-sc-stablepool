@@ -6,7 +6,7 @@ PROXY=https://gateway.multiversx.com
 SC_ADDRESS=$(mxpy data load --key=address-mainnet-usdc-usdt)
 CHAIN=1
 SCRIPT_DIR=$(dirname $0)
-SDK_RUST_CONTRACT_BUILDER_TAG=v5.3.0
+SDK_RUST_CONTRACT_BUILDER_TAG=v6.1.0
 AMP_FACTOR=256
 USDC_ID=USDC-c76f1f
 USDT_ID=USDT-f8c08c
@@ -30,7 +30,7 @@ deploy() {
         --keyfile=${KEYFILE} --gas-limit=75000000 --outfile="deploy-mainnet.interaction.json" \
         --proxy=${PROXY} --chain=${CHAIN} --recall-nonce --send || return
 
-    SC_ADDRESS=$(mxpy data parse --file="deploy-mainnet.interaction.json" --expression="data['contractAddress']")
+    SC_ADDRESS=$(cat deploy-mainnet.interaction.json | jq -r .contractAddress)
 
     mxpy data store --key=address-mainnet-usdc-usdt --value=${SC_ADDRESS}
 

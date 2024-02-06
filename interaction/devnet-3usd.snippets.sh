@@ -1,17 +1,24 @@
 #!/bin/bash
 
-BYTECODE=../output/jex-sc-stablepool.wasm
+BYTECODE=../output-docker/jex-sc-stablepool/jex-sc-stablepool.wasm
 KEYFILE="../../wallets/deployer-shard1.json"
 PROXY=https://devnet-gateway.multiversx.com
 SC_ADDRESS=$(mxpy data load --key=address-devnet-3usd)
 CHAIN=D
 SCRIPT_DIR=$(dirname $0)
+SDK_RUST_CONTRACT_BUILDER_TAG=v6.1.0
 AMP_FACTOR=256
-BUSD_ID=BUSD-632f7d
-USDC_ID=USDC-8d4068
-USDT_ID=USDT-188935
+DAI_ID=WDAI-ebc861
+USDC_ID=USDC-c4398f
+USDT_ID=USDT-32b31e
 
 source "${SCRIPT_DIR}/_common.snippets.sh"
+
+build() {
+    pushd ..
+    mxpy contract reproducible-build --docker-image="multiversx/sdk-rust-contract-builder:${SDK_RUST_CONTRACT_BUILDER_TAG}"
+    popd
+}
 
 deploy() {
     echo 'You are about to deploy SC on devnet (Ctrl-C to abort)'
@@ -19,13 +26,13 @@ deploy() {
 
     mxpy contract deploy --bytecode=${BYTECODE} --metadata-payable \
         --arguments "${AMP_FACTOR}" \
-            "str:${BUSD_ID}" "1" \
+            "str:${DAI_ID}" "1" \
             "str:${USDC_ID}" "1000000000000" \
             "str:${USDT_ID}" "1000000000000" \
         --keyfile=${KEYFILE} --gas-limit=75000000 --outfile="deploy-devnet.interaction.json" \
         --proxy=${PROXY} --chain=${CHAIN} --recall-nonce --send || return
 
-    SC_ADDRESS=$(mxpy data parse --file="deploy-devnet.interaction.json" --expression="data['contractAddress']")
+    SC_ADDRESS=$(cat deploy-devnet.interaction.json | jq -r .contractAddress)
 
     mxpy data store --key=address-devnet-3usd --value=${SC_ADDRESS}
 
@@ -38,8 +45,7 @@ upgrade() {
     read answer
 
     mxpy contract upgrade --bytecode=${BYTECODE} --metadata-payable \
-        --arguments "0x" \
-            "0x" "0x" \
+        --arguments "0x" "0x" "0x" \
         --keyfile=${KEYFILE} --gas-limit=75000000 --outfile="deploy-devnet.interaction.json" \
         --proxy=${PROXY} --chain=${CHAIN} --recall-nonce --send ${SC_ADDRESS} || return
 

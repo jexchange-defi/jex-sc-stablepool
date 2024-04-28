@@ -1,0 +1,26 @@
+[package]
+name = "underlying-price-source-mock"
+version = "0.0.0"
+authors = ["you"]
+edition = "2021"
+publish = false
+
+[lib]
+path = "src/underlying_price_source_mock.rs"
+
+[dependencies.multiversx-sc]
+version = "0.47.8"
+
+[dev-dependencies]
+num-bigint = "0.4"
+
+[dev-dependencies.multiversx-sc-scenario]
+version = "0.47.8"
+
+[workspace]
+members = [
+    ".",
+    "meta",
+    "underlying-price-source-mock",
+    "underlying-price-source-mock/meta"
+]

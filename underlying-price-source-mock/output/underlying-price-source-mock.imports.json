@@ -1,0 +1,9 @@
+[
+  "bigIntFinishUnsigned",
+  "checkNoPayment",
+  "getNumArguments",
+  "mBufferSetBytes",
+  "mBufferStorageLoad",
+  "mBufferToBigIntUnsigned",
+  "signalError"
+]

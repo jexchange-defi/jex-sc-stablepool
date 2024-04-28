@@ -1,0 +1,60 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.76.0-nightly",
+            "commitHash": "d86d65bbc19b928387f68427fcc3a0da498d8a19",
+            "commitDate": "2023-12-10",
+            "channel": "Nightly",
+            "short": "rustc 1.76.0-nightly (d86d65bbc 2023-12-10)"
+        },
+        "contractCrate": {
+            "name": "underlying-price-source-mock",
+            "version": "0.0.0"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.47.8"
+        }
+    },
+    "abi": {
+        "name": "UnderlyingPriceSourceMock",
+        "constructor": {
+            "inputs": [],
+            "outputs": []
+        },
+        "endpoints": [
+            {
+                "name": "getExchangeRate",
+                "mutability": "readonly",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "type": "BigUint"
+                    }
+                ]
+            }
+        ],
+        "esdtAttributes": [],
+        "hasCallback": false,
+        "types": {}
+    },
+    "size": 476,
+    "code": "0061736d01000000011e066000006000017f60027f7f017f60027f7f0060037f7f7f017f60017f0002a6010703656e760f6765744e756d417267756d656e7473000103656e760b7369676e616c4572726f72000303656e760e636865636b4e6f5061796d656e74000003656e760f6d4275666665725365744279746573000403656e76126d42756666657253746f726167654c6f6164000203656e76176d427566666572546f426967496e74556e7369676e6564000203656e7614626967496e7446696e697368556e7369676e6564000503060500000001000503010003060f027f0041ac80080b7f0041b080080b074906066d656d6f7279020004696e697400080f67657445786368616e67655261746500090863616c6c4261636b000b0a5f5f646174615f656e6403000b5f5f686561705f6261736503010a6505120010004504400f0b4180800841191001000b0600100210070b2b01017f10021007100a220041998008410d10031a2000100a220010041a2000100a220010051a200010060b1901017f41a8800841a8800828020041016b220036020020000b0300010b0b390200418080080b2677726f6e67206e756d626572206f6620617267756d656e747365786368616e67655f726174650041a880080b049cffffff",
+    "report": {
+        "imports": [
+            "bigIntFinishUnsigned",
+            "checkNoPayment",
+            "getNumArguments",
+            "mBufferSetBytes",
+            "mBufferStorageLoad",
+            "mBufferToBigIntUnsigned",
+            "signalError"
+        ],
+        "memoryAllocationError": false,
+        "isMemGrow": false,
+        "eiCheck": {
+            "eiVersion": "1.3",
+            "ok": true
+        }
+    }
+}

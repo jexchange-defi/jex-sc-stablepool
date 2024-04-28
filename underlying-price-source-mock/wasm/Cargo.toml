@@ -5,9 +5,9 @@
 # ##########################################
 
 [package]
-name = "jex-sc-stablepool-wasm"
+name = "underlying-price-source-mock-wasm"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 publish = false
 
 [lib]
@@ -21,7 +21,7 @@ debug = false
 panic = "abort"
 overflow-checks = false
 
-[dependencies.jex-sc-stablepool]
+[dependencies.underlying-price-source-mock]
 path = ".."
 
 [dependencies.multiversx-sc-wasm-adapter]

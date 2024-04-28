@@ -1,0 +1,12 @@
+[package]
+name = "underlying-price-source-mock-meta"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies.underlying-price-source-mock]
+path = ".."
+
+[dependencies.multiversx-sc-meta]
+version = "0.47.8"
+default-features = false

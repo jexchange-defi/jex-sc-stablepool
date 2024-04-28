@@ -13,6 +13,11 @@
           "creatorAddress": "address:owner",
           "creatorNonce": "1",
           "newAddress": "sc:pool"
+        },
+        {
+          "creatorAddress": "address:owner",
+          "creatorNonce": "2",
+          "newAddress": "sc:segld_staking"
         }
       ]
     },
@@ -63,6 +68,24 @@
           }
         },
         "+": ""
+      }
+    },
+    {
+      "step": "scDeploy",
+      "id": "deploy",
+      "tx": {
+        "from": "address:owner",
+        "contractCode": "file:../underlying-price-source-mock/output/underlying-price-source-mock.wasm",
+        "arguments": [],
+        "gasLimit": "5,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "out": [],
+        "status": "",
+        "logs": [],
+        "gas": "*",
+        "refund": "*"
       }
     }
   ]

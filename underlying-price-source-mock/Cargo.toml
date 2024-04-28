@@ -20,7 +20,5 @@ version = "0.47.8"
 [workspace]
 members = [
     ".",
-    "meta",
-    "underlying-price-source-mock",
-    "underlying-price-source-mock/meta"
+    "meta"
 ]

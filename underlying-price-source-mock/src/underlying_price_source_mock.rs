@@ -12,7 +12,6 @@ pub trait UnderlyingPriceSourceMock {
         self.exchange_rate().get()
     }
 
-    #[view(getExchangeRate)]
     #[storage_mapper("exchange_rate")]
     fn exchange_rate(&self) -> SingleValueMapper<BigUint>;
 }

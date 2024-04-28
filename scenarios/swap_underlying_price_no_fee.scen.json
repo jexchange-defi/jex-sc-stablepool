@@ -1,0 +1,112 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "address:user": {
+          "nonce": "0",
+          "balance": "0",
+          "esdt": {
+            "str:WEGLD-000000": "5_000,000_000_000_000_000_000"
+          }
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:SEGLD-000000": "34_757,243_263_043_583_945_104",
+            "str:WEGLD-000000": "15_347,185_452_846_389_893_231"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:reserves|u32:0": "34_757,243_263_043_583_945_104",
+            "str:reserves|u32:1": "15_347,185_452_846_389_893_231",
+            "str:liquidity_fee": "0",
+            "str:lp_token": "str:LPEGLDSEGLD-000000",
+            "str:lp_token_supply": "30000,000000000000000000",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1",
+            "str:nb_tokens": "2",
+            "str:swap_fee": "0",
+            "str:tokens|u32:0": "str:SEGLD-000000",
+            "str:tokens|u32:1": "str:WEGLD-000000",
+            "str:underlying_price_source|u32:0": "sc:segld_staking|nested:str:getExchangeRate"
+          }
+        },
+        "sc:segld_staking": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../underlying-price-source-mock/output/underlying-price-source-mock.wasm",
+          "storage": {
+            "str:exchange_rate": "1,013_470_148_086_771_241"
+          }
+        }
+      },
+      "currentBlockInfo": {
+        "blockEpoch": "444"
+      }
+    },
+    {
+      "step": "scCall",
+      "tx": {
+        "from": "address:user",
+        "to": "sc:pool",
+        "function": "swap",
+        "esdtValue": [
+          {
+            "tokenIdentifier": "str:WEGLD-000000",
+            "value": "5_000,000_000_000_000_000_000"
+          }
+        ],
+        "arguments": ["str:SEGLD-000000", "4_947,000_000_000_000_000_000"],
+        "gasLimit": "10,000,000",
+        "gasPrice": "0"
+      },
+      "expect": {
+        "status": "0",
+        "message": "",
+        "out": "*",
+        "gas": "*",
+        "refund": "*"
+      }
+    },
+    {
+      "step": "checkState",
+      "accounts": {
+        "address:user": {
+          "nonce": "*",
+          "balance": "0",
+          "esdt": {
+            "str:SEGLD-000000": "4947,425_727_157_696_845_098"
+          }
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "*",
+          "esdt": {
+            "str:WEGLD-000000": "20_347,185_452_846_389_893_231",
+            "str:SEGLD-000000": "29_809,817_535_885_887_100_006"
+          },
+          "storage": {
+            "str:an_t_vol|u64:444|nested:str:WEGLD-000000": "5_000,000_000_000_000_000_000",
+            "str:an_t_vol|u64:444|nested:str:SEGLD-000000": "4947,425_727_157_696_845_098",
+            "str:an_lp_fees|u64:444|nested:str:WEGLD-000000": "",
+            "str:an_lp_fees|u64:444|nested:str:SEGLD-000000": "",
+            "str:reserves|u32:0": "29_809,817_535_885_887_100_006",
+            "str:reserves|u32:1": "20_347,185_452_846_389_893_231",
+            "str:lp_token_supply": "30000,000000000000000000",
+            "+": ""
+          }
+        },
+        "+": ""
+      }
+    }
+  ]
+}

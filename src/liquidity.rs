@@ -70,7 +70,10 @@ pub trait LiquidityModule:
         // Recalculate y with xp including imbalance fees
         let y1 = self.amm_get_yd(i, &new_xs, &d1);
         // - 1 to round down
-        let dy = (new_xs.get(i).clone_value() - y1 - 1u32) / self.multipliers(i).get();
+        let mut dy = (new_xs.get(i).clone_value() - y1 - 1u32) / self.multipliers(i).get();
+
+        dy = dy * UNDERLYING_PRICE_PRECISION / self.underlying_price(i);
+
         let fee = dy0 - &dy;
 
         (dy, fee)

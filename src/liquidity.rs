@@ -146,11 +146,15 @@ pub trait LiquidityModule:
         address: ManagedAddress,
         endpoint_name: ManagedBuffer,
     ) {
-        self.underlying_price_source(i_token)
-            .set(UnderlyingPriceSource {
-                address,
-                endpoint_name,
-            });
+        if endpoint_name.len() > 0 {
+            self.underlying_price_source(i_token)
+                .set(UnderlyingPriceSource {
+                    address,
+                    endpoint_name,
+                });
+        } else {
+            self.underlying_price_source(i_token).clear();
+        }
     }
 
     fn do_remove_liquidity(

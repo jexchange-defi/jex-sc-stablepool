@@ -13,5 +13,5 @@ fn world() -> ScenarioWorld {
 
 #[test]
 fn empty_rs() {
-    world().run("scenarios/add_liquidity_balanced.scen.json");
+    world().run("scenarios/estimate_add_liquidity_underlying.scen.json");
 }

@@ -25,6 +25,7 @@ pub struct PairStatus<M: ManagedTypeApi> {
     volume_prev_epoch: ManagedVec<M, BigUint<M>>,
     fees_prev_epoch: ManagedVec<M, BigUint<M>>,
     fees_last_7_epochs: ManagedVec<M, BigUint<M>>,
+    underlying_prices: ManagedVec<M, BigUint<M>>,
 }
 
 #[multiversx_sc::contract]
@@ -80,6 +81,19 @@ pub trait JexScStablepoolContract:
     #[endpoint(configurePlatformFeesReceiver)]
     fn configure_platform_fees_receiver(&self, receiver: &ManagedAddress) {
         self.do_configure_platform_fees_receiver(receiver);
+    }
+
+    #[only_owner]
+    #[endpoint(configureUnderlyingPriceSource)]
+    fn configure_underlying_price_source(
+        &self,
+        token: TokenIdentifier,
+        address: ManagedAddress,
+        endpoint_name: ManagedBuffer,
+    ) {
+        let i_token = self.get_token_index(&token);
+
+        self.do_configure_underlying_price_source(i_token, address, endpoint_name);
     }
 
     #[only_owner]
@@ -397,6 +411,10 @@ pub trait JexScStablepoolContract:
             fees_last_7_epochs.push(sum_lp_fees);
         }
 
+        let underlying_prices = (0..self.nb_tokens().get())
+            .map(|i_token| self.underlying_price(i_token))
+            .collect();
+
         PairStatus {
             paused: self.is_paused().get(),
             amp_factor: self.amp_factor().get(),
@@ -411,6 +429,7 @@ pub trait JexScStablepoolContract:
             volume_prev_epoch,
             fees_prev_epoch,
             fees_last_7_epochs,
+            underlying_prices,
         }
     }
 

@@ -1,6 +1,14 @@
 multiversx_sc::imports!();
+multiversx_sc::derive_imports!();
 
 const ONE_LP_TOKEN: u64 = 1_000_000_000_000_000_000u64;
+const UNDERLYING_PRICE_PRECISION: u64 = 1_000_000_000_000_000_000u64;
+
+#[derive(TopDecode, TopEncode, TypeAbi)]
+struct UnderlyingPriceSource<M: ManagedTypeApi> {
+    address: ManagedAddress<M>,
+    endpoint_name: ManagedBuffer<M>,
+}
 
 #[multiversx_sc::module]
 pub trait LiquidityModule:
@@ -62,7 +70,10 @@ pub trait LiquidityModule:
         // Recalculate y with xp including imbalance fees
         let y1 = self.amm_get_yd(i, &new_xs, &d1);
         // - 1 to round down
-        let dy = (new_xs.get(i).clone_value() - y1 - 1u32) / self.multipliers(i).get();
+        let mut dy = (new_xs.get(i).clone_value() - y1 - 1u32) / self.multipliers(i).get();
+
+        dy = dy * UNDERLYING_PRICE_PRECISION / self.underlying_price(i);
+
         let fee = dy0 - &dy;
 
         (dy, fee)
@@ -84,7 +95,11 @@ pub trait LiquidityModule:
         for i in 0..n {
             let amount = amounts.get(i).clone_value();
             if &amount > &0 {
-                new_xs.push(old_xs.get(i).clone_value() + amount * self.multipliers(i).get());
+                let val = old_xs.get(i).clone_value()
+                    + (amount.clone() * self.multipliers(i).get() * self.underlying_price(i)
+                        / UNDERLYING_PRICE_PRECISION);
+
+                new_xs.push(val);
             } else {
                 new_xs.push(old_xs.get(i).clone_value());
             }
@@ -130,6 +145,23 @@ pub trait LiquidityModule:
         }
 
         shares
+    }
+
+    fn do_configure_underlying_price_source(
+        &self,
+        i_token: usize,
+        address: ManagedAddress,
+        endpoint_name: ManagedBuffer,
+    ) {
+        if endpoint_name.len() > 0 {
+            self.underlying_price_source(i_token)
+                .set(UnderlyingPriceSource {
+                    address,
+                    endpoint_name,
+                });
+        } else {
+            self.underlying_price_source(i_token).clear();
+        }
     }
 
     fn do_remove_liquidity(
@@ -185,6 +217,8 @@ pub trait LiquidityModule:
         // -1 to round down
         let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
 
+        dy = dy * self.underlying_price(i) / self.underlying_price(j);
+
         // Subtract fee from dy
         let (lp_fee, platform_fee) = self.calculate_swap_fee(&dy);
         dy -= &lp_fee;
@@ -218,7 +252,10 @@ pub trait LiquidityModule:
         let mut xp = ManagedVec::<Self::Api, BigUint>::new();
 
         for i in 0..self.nb_tokens().get() {
-            xp.push(self.reserves(i).get() * self.multipliers(i).get());
+            xp.push(
+                self.reserves(i).get() * self.multipliers(i).get() * self.underlying_price(i)
+                    / UNDERLYING_PRICE_PRECISION,
+            );
         }
 
         xp
@@ -236,6 +273,18 @@ pub trait LiquidityModule:
 
         let lp_token = self.lp_token().get();
         self.send().esdt_local_mint(&lp_token, 0, amount);
+    }
+
+    fn underlying_price(&self, i_token: usize) -> BigUint {
+        return if self.underlying_price_source(i_token).is_empty() {
+            BigUint::from(UNDERLYING_PRICE_PRECISION)
+        } else {
+            let source = self.underlying_price_source(i_token).get();
+
+            self.send()
+                .contract_call::<BigUint>(source.address, source.endpoint_name)
+                .execute_on_dest_context_readonly::<BigUint>()
+        };
     }
 
     #[view(getReserves)]
@@ -257,4 +306,11 @@ pub trait LiquidityModule:
     #[view(getNbTokens)]
     #[storage_mapper("nb_tokens")]
     fn nb_tokens(&self) -> SingleValueMapper<usize>;
+
+    #[view(getUnderlyingPriceSource)]
+    #[storage_mapper("underlying_price_source")]
+    fn underlying_price_source(
+        &self,
+        i: usize,
+    ) -> SingleValueMapper<UnderlyingPriceSource<Self::Api>>;
 }

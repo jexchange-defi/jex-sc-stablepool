@@ -44,6 +44,17 @@ enableMintBurn() {
         --proxy=${PROXY} --chain=${CHAIN} --send || return
 }
 
+configureUnderlyingPriceSource() {
+    read -p 'Token ID: ' TOKEN_ID
+    read -p 'Source address: ' SOURCE_ADDRESS
+    read -p 'Endpoint name: ' ENDPOINT_NAME
+
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="configureUnderlyingPriceSource" \
+        --arguments "str:${TOKEN_ID}" "${SOURCE_ADDRESS}" "str:${ENDPOINT_NAME}" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
 pause() {
     mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
         --function="pause" \
@@ -75,7 +86,7 @@ addLiquidity() {
     done
     set -x
 
-    mxpy contract call ${USER_ADDRESS} --recall-nonce --pem=${1} --gas-limit=10000000 \
+    mxpy contract call ${USER_ADDRESS} --recall-nonce --pem=${1} --gas-limit=20000000 \
         --function="MultiESDTNFTTransfer" \
         --arguments "${SC_ADDRESS}" "${NB_TOKENS}" \
             ${PAYMENTS} \
@@ -105,7 +116,7 @@ estimateAmountOut() {
     read -p "Amount IN: " AMOUNT_IN
     read -p "Token OUT: " TOKEN_OUT
 
-    mxpy --verbose contract query ${SC_ADDRESS} \
+    mxpy contract query ${SC_ADDRESS} \
         --function "estimateAmountOut" \
         --arguments "str:${TOKEN_IN}" "${AMOUNT_IN}" "str:${TOKEN_OUT}" \
         --proxy=${PROXY} | jq .[].number

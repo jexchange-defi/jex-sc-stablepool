@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           31
+// Endpoints:                           33
 // Async Callback:                       1
-// Total number of exported functions:  33
+// Total number of exported functions:  35
 
 #![no_std]
 #![allow(internal_features)]
@@ -22,6 +22,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         init => init
         upgrade => upgrade
         configurePlatformFeesReceiver => configure_platform_fees_receiver
+        configureUnderlyingPriceSource => configure_underlying_price_source
         setSwapFee => set_swap_fee
         issueLpToken => issue_lp_token
         enableMintBurn => enable_mint_burn
@@ -50,6 +51,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getLptoken => lp_token
         getmultipliers => multipliers
         getNbTokens => nb_tokens
+        getUnderlyingPriceSource => underlying_price_source
         isPaused => is_paused
     )
 }

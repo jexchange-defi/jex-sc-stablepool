@@ -5,6 +5,7 @@ multiversx_sc::derive_imports!();
 
 mod amm;
 mod analytics;
+mod events;
 mod fees;
 mod liquidity;
 mod maths;
@@ -32,6 +33,7 @@ pub struct PairStatus<M: ManagedTypeApi> {
 pub trait JexScStablepoolContract:
     amm::AmmModule
     + analytics::AnalyticsModule
+    + events::EventsModule
     + fees::FeesModule
     + liquidity::LiquidityModule
     + maths::MathsModule
@@ -284,7 +286,7 @@ pub trait JexScStablepoolContract:
 
         require!(amount_out >= min_amount_out, "Max slippage exceeded");
 
-        let payment_out = EsdtTokenPayment::new(token_out, 0u64, amount_out);
+        let payment_out = EsdtTokenPayment::new(token_out.clone(), 0u64, amount_out.clone());
 
         self.send().direct_esdt(
             &self.blockchain().get_caller(),
@@ -305,6 +307,15 @@ pub trait JexScStablepoolContract:
         self.analytics_add_lp_fees(&payment_out.token_identifier, &lp_fee);
         self.analytics_add_volume(&token_in, &amount_in);
         self.analytics_add_volume(&payment_out.token_identifier, &payment_out.amount);
+
+        self.emit_swap_event(
+            token_in,
+            amount_in,
+            token_out,
+            amount_out,
+            lp_fee,
+            platform_fee,
+        );
 
         payment_out
     }

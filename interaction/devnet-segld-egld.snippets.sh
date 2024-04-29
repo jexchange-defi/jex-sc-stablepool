@@ -15,6 +15,7 @@ source "${SCRIPT_DIR}/_common.snippets.sh"
 
 build() {
     pushd ..
+    rm -rf output-docker
     mxpy contract reproducible-build --docker-image="multiversx/sdk-rust-contract-builder:${SDK_RUST_CONTRACT_BUILDER_TAG}"
     popd
 }

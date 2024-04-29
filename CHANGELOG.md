@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0]
+
+### Added
+
+- underlying token price source management for yield bearer tokens (eg: SEGLD-EGLD)
+
+### Changed
+
+- upgrade to `sdk-rs 0.47.8`
+
 ## [1.1.0]
 
 ### Added

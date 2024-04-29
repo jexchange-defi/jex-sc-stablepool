@@ -1,0 +1,68 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:SEGLD-000000": "50,000000000000000000",
+            "str:WEGLD-000000": "100,000000000000000000"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:reserves|u32:0": "50,000000000000000000",
+            "str:reserves|u32:1": "100,000000000000000000",
+            "str:liquidity_fee": "0",
+            "str:lp_token": "str:LPJ3USD-000000",
+            "str:lp_token_supply": "200,000000000000000000",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1",
+            "str:nb_tokens": "2",
+            "str:swap_fee": "0",
+            "str:tokens|u32:0": "str:SEGLD-000000",
+            "str:tokens|u32:1": "str:WEGLD-000000",
+            "str:underlying_price_source|u32:0": "sc:segld_staking|nested:str:getExchangeRate"
+          }
+        },
+        "sc:segld_staking": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../underlying-price-source-mock/output/underlying-price-source-mock.wasm",
+          "storage": {
+            "str:exchange_rate": "2,000000000000000000"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["1,000000000000000000", "0"]
+      },
+      "expect": {
+        "out": ["1,999961470991714756"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["0", "1,000000000000000000"]
+      },
+      "expect": {
+        "out": ["0,999990320531503154"]
+      }
+    }
+  ]
+}

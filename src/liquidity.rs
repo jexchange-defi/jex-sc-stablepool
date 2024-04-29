@@ -95,7 +95,11 @@ pub trait LiquidityModule:
         for i in 0..n {
             let amount = amounts.get(i).clone_value();
             if &amount > &0 {
-                new_xs.push(old_xs.get(i).clone_value() + amount * self.multipliers(i).get());
+                let val = old_xs.get(i).clone_value()
+                    + (amount.clone() * self.multipliers(i).get() * self.underlying_price(i)
+                        / UNDERLYING_PRICE_PRECISION);
+
+                new_xs.push(val);
             } else {
                 new_xs.push(old_xs.get(i).clone_value());
             }

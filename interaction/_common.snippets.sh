@@ -123,6 +123,11 @@ estimateAmountOut() {
 }
 
 getStatus() {
-    mxpy --verbose contract query ${SC_ADDRESS} --function "getStatus" --proxy=${PROXY} \
+    mxpy contract query ${SC_ADDRESS} --function "getStatus" --proxy=${PROXY} \
         | jq .[].hex
+}
+
+getVirtualPrice() {
+    mxpy contract query ${SC_ADDRESS} --function "getVirtualPrice" --proxy=${PROXY} \
+        | jq .[].number
 }

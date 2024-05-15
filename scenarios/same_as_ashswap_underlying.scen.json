@@ -1,0 +1,120 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:SEGLD-000000": "57029637408868858510691",
+            "str:WEGLD-000000": "21177174423902697615022"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:reserves|u32:0": "57029637408868858510691",
+            "str:reserves|u32:1": "21177174423902697615022",
+            "str:liquidity_fee": "250",
+            "str:lp_token": "str:LPEGLDSEGLD-000000",
+            "str:lp_token_supply": "78047505004762717119399",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1",
+            "str:nb_tokens": "2",
+            "str:swap_fee": "500",
+            "str:tokens|u32:0": "str:SEGLD-000000",
+            "str:tokens|u32:1": "str:WEGLD-000000",
+            "str:underlying_price_source|u32:0": "sc:segld_staking|nested:str:getExchangeRate"
+          }
+        },
+        "sc:segld_staking": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../underlying-price-source-mock/output/underlying-price-source-mock.wasm",
+          "storage": {
+            "str:exchange_rate": "1054372717511654654"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:segld_staking",
+        "function": "getExchangeRate",
+        "arguments": []
+      },
+      "expect": {
+        "out": ["1054372717511654654"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountOut",
+        "arguments": [
+          "str:SEGLD-000000",
+          "10,000_000_000_000_000_000",
+          "str:WEGLD-000000"
+        ]
+      },
+      "expect": {
+        "out": ["10472725634045498516"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["10,000000000000000000", "10,000000000000000000"]
+      },
+      "expect": {
+        "out": ["19745695365935295372"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["0", "10,000000000000000000"]
+      },
+      "expect": {
+        "out": ["9639910991530739549"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAddLiquidity",
+        "arguments": ["10,000000000000000000", "0"]
+      },
+      "expect": {
+        "out": ["10103126734971976165"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountOut",
+        "arguments": [
+          "str:WEGLD-000000",
+          "10,000_000_000_000_000_000",
+          "str:SEGLD-000000"
+        ]
+      },
+      "expect": {
+        "out": ["9538997928669043624"]
+      }
+    }
+  ]
+}

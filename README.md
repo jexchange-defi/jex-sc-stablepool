@@ -4,7 +4,7 @@ An implementation of stable swap AMM smart contract from "Solidity by example" o
 
 Source: https://solidity-by-example.org/defi/stable-swap-amm/ (MIT licence)
 
-This smart contract also implements concepts from Curve "lending" pools, where asset theorical prices are delegated to another smart contract (liquid staking protocol, oracle, ...).
+This smart contract also implements concepts from [Curve](https://curve.fi) "lending" pools, where asset theorical prices are delegated to another smart contract (liquid staking protocol, oracle, ...).
 
 # License
 

@@ -1,0 +1,57 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:APUSDC-000000": "92940,181413",
+            "str:USDC-000000": "47299,601270"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:reserves|u32:0": "92940,181413",
+            "str:reserves|u32:1": "47299,601270",
+            "str:liquidity_fee": "250",
+            "str:lp_token": "str:LP-000000",
+            "str:lp_token_supply": "143967,342404626722458389",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1",
+            "str:nb_tokens": "2",
+            "str:swap_fee": "500",
+            "str:tokens|u32:0": "str:APUSDC-000000",
+            "str:tokens|u32:1": "str:USDC-000000",
+            "str:underlying_price_source|u32:0": "sc:apusdc_vault|nested:str:getExchangeRate"
+          }
+        },
+        "sc:apusdc_vault": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../underlying-price-source-mock/output/underlying-price-source-mock.wasm",
+          "storage": {
+            "str:exchange_rate": "1,273499698945684391"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateRemoveLiquidityOneToken",
+        "arguments": ["10000,000000000000000000", "str:USDC-000000"]
+      },
+      "expect": {
+        "out": ["11450,073618"]
+      }
+    }
+  ]
+}

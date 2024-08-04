@@ -208,7 +208,9 @@ pub trait LiquidityModule:
 
         // Calculate dy
         let xp = self.get_xp();
-        let x = xp.get(i).clone_value() + &dx * &self.multipliers(i).get();
+        let x = xp.get(i).clone_value()
+            + &dx * &self.multipliers(i).get() * self.underlying_price(i)
+                / UNDERLYING_PRICE_PRECISION;
 
         let y0 = xp.get(j).clone_value();
         let y1 = self.amm_get_y(i, j, x, xp);
@@ -217,7 +219,7 @@ pub trait LiquidityModule:
         // -1 to round down
         let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
 
-        dy = dy * self.underlying_price(i) / self.underlying_price(j);
+        dy = dy * UNDERLYING_PRICE_PRECISION / self.underlying_price(j);
 
         // Subtract fee from dy
         let (lp_fee, platform_fee) = self.calculate_swap_fee(&dy);

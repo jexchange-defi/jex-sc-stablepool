@@ -117,6 +117,7 @@ pub trait LiquidityModule:
                 let ideal_balance = (old_xs.get(i).clone_value() * &d1) / &d0;
                 let diff = self.abs_diff(&new_xs.get(i).clone_value(), &ideal_balance);
                 let fee = self.calculate_liquidity_fee(&diff);
+                // no platform fees
                 let new_xi = new_xs.get(i).clone_value() - fee;
                 new_xs2.push(new_xi);
             }

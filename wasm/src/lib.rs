@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           33
+// Endpoints:                           36
 // Async Callback:                       1
-// Total number of exported functions:  35
+// Total number of exported functions:  38
 
 #![no_std]
 #![allow(internal_features)]
@@ -28,6 +28,9 @@ multiversx_sc_wasm_adapter::endpoints! {
         enableMintBurn => enable_mint_burn
         pause => pause
         resume => resume
+        allowSc => allow_sc
+        enableAccessControl => enable_access_control
+        disableAccessControl => disable_access_control
         addLiquidity => add_liquidity
         removeLiquidity => remove_liquidity
         removeLiquidityOneToken => remove_liquidity_one_token

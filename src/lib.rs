@@ -3,6 +3,7 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
+mod access_control;
 mod amm;
 mod analytics;
 mod events;
@@ -31,7 +32,8 @@ pub struct PairStatus<M: ManagedTypeApi> {
 
 #[multiversx_sc::contract]
 pub trait JexScStablepoolContract:
-    amm::AmmModule
+    access_control::AccessControlModule
+    + amm::AmmModule
     + analytics::AnalyticsModule
     + events::EventsModule
     + fees::FeesModule
@@ -166,6 +168,24 @@ pub trait JexScStablepoolContract:
         self.do_unpause();
     }
 
+    #[only_owner]
+    #[endpoint(allowSc)]
+    fn allow_sc(&self, address: &ManagedAddress, allow: bool) {
+        self.do_allow_sc(address, allow);
+    }
+
+    #[only_owner]
+    #[endpoint(enableAccessControl)]
+    fn enable_access_control(&self) {
+        self.do_enable_access_control();
+    }
+
+    #[only_owner]
+    #[endpoint(disableAccessControl)]
+    fn disable_access_control(&self) {
+        self.do_disable_access_control();
+    }
+
     //
     // Public endpoints
     //
@@ -273,6 +293,8 @@ pub trait JexScStablepoolContract:
     #[payable("*")]
     fn swap(&self, token_out: TokenIdentifier, min_amount_out: BigUint) -> EsdtTokenPayment {
         require!(min_amount_out > 1, "Invalid min amount to receive");
+
+        self.require_caller_is_authorized();
 
         self.require_not_paused();
 

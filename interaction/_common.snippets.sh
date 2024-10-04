@@ -67,6 +67,27 @@ resume() {
         --proxy=${PROXY} --chain=${CHAIN} --send || return
 }
 
+enableAccessControl() {
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="enableAccessControl" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+disableAccessControl() {
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="disableAccessControl" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
+allowSc() {
+    read -p 'SC address: ' ALLOWED_SC_ADDRESS
+    read -p 'Allowed (0|1): ' ALLOWED
+
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=10000000 \
+        --function="allowSc" --arguments "${ALLOWED_SC_ADDRESS}" "${ALLOWED}" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
 ##
 # Public endpoints
 ##

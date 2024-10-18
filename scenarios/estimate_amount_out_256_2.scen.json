@@ -1,0 +1,55 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:WDAI-000000": "18,435,214786690045997381",
+            "str:USDT-000000": "17,800,343931",
+            "str:JWLUSD-000000": "80,002,467145381198156678"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:reserves|u32:0": "18,435,214786690045997381",
+            "str:reserves|u32:1": "17,800,343931",
+            "str:reserves|u32:2": "80,002,467145381198156678",
+            "str:liquidity_fee": "0",
+            "str:lp_token": "str:LPJ3USD-000000",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1,000000000000",
+            "str:multipliers|u32:2": "1",
+            "str:nb_tokens": "3",
+            "str:swap_fee": "500",
+            "str:tokens|u32:0": "str:WDAI-000000",
+            "str:tokens|u32:1": "str:USDT-000000",
+            "str:tokens|u32:2": "str:JWLUSD-000000"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountOut",
+        "arguments": [
+          "str:WDAI-000000",
+          "5000,000000000000000000",
+          "str:USDT-000000"
+        ]
+      },
+      "expect": {
+        "out": ["4967,081132"]
+      }
+    }
+  ]
+}

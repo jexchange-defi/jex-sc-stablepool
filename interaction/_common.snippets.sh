@@ -88,6 +88,12 @@ allowSc() {
         --proxy=${PROXY} --chain=${CHAIN} --send || return
 }
 
+claimDeveloperRewards() {
+    mxpy contract call ${SC_ADDRESS} --recall-nonce --keyfile=${KEYFILE} --gas-limit=6000000 \
+        --function="ClaimDeveloperRewards" \
+        --proxy=${PROXY} --chain=${CHAIN} --send || return
+}
+
 ##
 # Public endpoints
 ##

@@ -207,20 +207,7 @@ pub trait LiquidityModule:
     ) -> (BigUint, BigUint, BigUint) {
         require!(i != j, "Tokens must be different");
 
-        // Calculate dy
-        let xp = self.get_xp();
-        let x = xp.get(i).clone_value()
-            + &dx * &self.multipliers(i).get() * self.underlying_price(i)
-                / UNDERLYING_PRICE_PRECISION;
-
-        let y0 = xp.get(j).clone_value();
-        let y1 = self.amm_get_y(i, j, x, xp);
-
-        // y0 must be >= y1, since x has increased
-        // -1 to round down
-        let mut dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
-
-        dy = dy * UNDERLYING_PRICE_PRECISION / self.underlying_price(j);
+        let mut dy = self.get_dy(i, j, &dx);
 
         // Subtract fee from dy
         let (lp_fee, platform_fee) = self.calculate_swap_fee(&dy);
@@ -248,6 +235,36 @@ pub trait LiquidityModule:
         }
 
         amount_out
+    }
+
+    fn get_dy(&self, i: usize, j: usize, dx: &BigUint) -> BigUint {
+        // Calculate dy
+        let xp = self.get_xp();
+        let x = xp.get(i).clone_value()
+            + dx * &self.multipliers(i).get() * self.underlying_price(i)
+                / UNDERLYING_PRICE_PRECISION;
+
+        let y0 = xp.get(j).clone_value();
+        let y1 = self.amm_get_y(i, j, x, xp);
+
+        // y0 must be >= y1, since x has increased
+        // -1 to round down
+        let dy = (&y0 - &y1 - 1u32) / self.multipliers(j).get();
+
+        dy * UNDERLYING_PRICE_PRECISION / self.underlying_price(j)
+    }
+
+    fn get_dx(&self, i: usize, j: usize, dy: &BigUint) -> BigUint {
+        let xp = self.get_xp();
+
+        let y = xp.get(j).clone_value()
+            - dy * &self.multipliers(j).get() * self.underlying_price(j)
+                / UNDERLYING_PRICE_PRECISION;
+
+        let x = self.amm_get_y(j, i, y, xp.clone());
+
+        (x - xp.get(i).clone_value()) * UNDERLYING_PRICE_PRECISION
+            / (self.multipliers(i).get() * self.underlying_price(i))
     }
 
     // Return precision-adjusted reserves, adjusted to 18 decimals

@@ -1,0 +1,103 @@
+{
+  "steps": [
+    {
+      "step": "setState",
+      "accounts": {
+        "address:owner": {
+          "nonce": "0",
+          "balance": "0"
+        },
+        "sc:pool": {
+          "nonce": "0",
+          "balance": "0",
+          "code": "file:../output/jex-sc-stablepool.wasm",
+          "esdt": {
+            "str:BUSD-000000": "514670,000000000000000000",
+            "str:USDC-000000": "392640,000000",
+            "str:USDT-000000": "495630,000000"
+          },
+          "owner": "address:owner",
+          "storage": {
+            "str:amp_factor": "256",
+            "str:reserves|u32:0": "514670,000000000000000000",
+            "str:reserves|u32:1": "392640,000000",
+            "str:reserves|u32:2": "495630,000000",
+            "str:liquidity_fee": "0",
+            "str:lp_token": "str:LPJ3USD-000000",
+            "str:multipliers|u32:0": "1",
+            "str:multipliers|u32:1": "1,000000000000",
+            "str:multipliers|u32:2": "1,000000000000",
+            "str:nb_tokens": "3",
+            "str:swap_fee": "500",
+            "str:tokens|u32:0": "str:BUSD-000000",
+            "str:tokens|u32:1": "str:USDC-000000",
+            "str:tokens|u32:2": "str:USDT-000000"
+          }
+        }
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountIn",
+        "arguments": ["str:USDC-000000", "998,369754", "str:BUSD-000000"]
+      },
+      "expect": {
+        "out": ["999,999999996749263861"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountIn",
+        "arguments": ["str:USDT-000000", "999,354086", "str:BUSD-000000"]
+      },
+      "expect": {
+        "out": ["999,999999810437899200"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountIn",
+        "arguments": ["str:USDT-000000", "1000,472814", "str:USDC-000000"]
+      },
+      "expect": {
+        "out": ["999,999999"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountIn",
+        "arguments": [
+          "str:BUSD-000000",
+          "1000,611788480939899103",
+          "str:USDC-000000"
+        ]
+      },
+      "expect": {
+        "out": ["999,999999"]
+      }
+    },
+    {
+      "step": "scQuery",
+      "tx": {
+        "to": "sc:pool",
+        "function": "estimateAmountIn",
+        "arguments": [
+          "str:BUSD-000000",
+          "99970,014270352630364419",
+          "str:USDC-000000"
+        ]
+      },
+      "expect": {
+        "out": ["99999,999999"]
+      }
+    }
+  ]
+}

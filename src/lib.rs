@@ -363,6 +363,23 @@ pub trait JexScStablepoolContract:
         amount_out
     }
 
+    #[view(estimateAmountIn)]
+    fn estimate_amount_in(
+        &self,
+        token_out: TokenIdentifier,
+        amount_out: BigUint,
+        token_in: TokenIdentifier,
+    ) -> BigUint {
+        self.require_not_paused();
+
+        let index_token_in = self.get_token_index(&token_in);
+        let index_token_out = self.get_token_index(&token_out);
+
+        let amount_out_with_fee = self.unapply_fee(&amount_out);
+
+        self.get_dx(index_token_in, index_token_out, &amount_out_with_fee)
+    }
+
     #[view(estimateAddLiquidity)]
     fn estimate_add_liquidity(&self, amounts: MultiValueEncoded<BigUint>) -> BigUint {
         self.require_not_paused();

@@ -19,6 +19,10 @@ pub trait FeesModule {
         (&total_fee - &platform_fee, platform_fee)
     }
 
+    fn unapply_fee(&self, amount: &BigUint) -> BigUint {
+        amount * FEE_DENOMINATOR / (BigUint::from(FEE_DENOMINATOR) - self.swap_fee().get())
+    }
+
     fn do_configure_platform_fees_receiver(&self, receiver: &ManagedAddress) {
         self.platform_fees_receiver().set(receiver);
     }

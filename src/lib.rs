@@ -134,9 +134,8 @@ pub trait JexScStablepoolContract:
                     can_add_special_roles: true,
                 },
             )
-            .async_call()
             .with_callback(self.callbacks().lp_token_issue_callback(&caller))
-            .call_and_exit();
+            .async_call_and_exit();
     }
 
     #[only_owner]
@@ -152,8 +151,7 @@ pub trait JexScStablepoolContract:
         self.send()
             .esdt_system_sc_proxy()
             .set_special_roles(&sc_address, &lp_token, roles.iter().cloned())
-            .async_call()
-            .call_and_exit();
+            .async_call_and_exit();
     }
 
     #[only_owner]

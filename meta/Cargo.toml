@@ -10,5 +10,5 @@ authors = ["you"]
 [dependencies.jex-sc-stablepool]
 path = ".."
 
-[dependencies.multiversx-sc-meta]
-version = "0.47.8"
+[dependencies.multiversx-sc-meta-lib]
+version = "0.53.2"
